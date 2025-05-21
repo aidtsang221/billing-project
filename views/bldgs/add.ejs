@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add New Building</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">Add New Building</h1>
+
+      <form action="/bldgs" method="POST">
+        <div class="mb-3">
+          <label for="bldg_name" class="form-label">Building Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="bldg_name"
+            name="bldg_name"
+            placeholder="Enter building name"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-success">Add Building</button>
+        <a href="/bldgs" class="btn btn-secondary ms-2">Cancel</a>
+      </form>
+
+      <div class="mt-4 text-center">
+        <a href="/bldgs">Back to Building List</a>
+      </div>
+    </div>
+  </body>
+</html>
