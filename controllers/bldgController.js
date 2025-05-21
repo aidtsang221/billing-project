@@ -40,6 +40,3 @@ export const showEditForm = async (req, res) => {};
 
 // Update Existing Building - To be Added
 export const updateBldg = async (req, res) => {};
-
-// Delete Building - To be Added
-export const deleteBldg = async (req, res) => {};
