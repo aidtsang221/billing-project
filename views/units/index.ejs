@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit Management</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">Unit Management</h1>
+
+      <div class="d-flex justify-content-between mb-3">
+        <a href="/" class="btn btn-secondary">Back to Home</a>
+        <a href="/units/add" class="btn btn-success">Add New Unit</a>
+      </div>
+
+      <% if (units.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Building</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Unit No.</th>
+              <th>Unit Area</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% units.forEach(unit => { %>
+            <tr>
+              <td><%= unit.bldg_name %></td>
+              <td><%= unit.first_name %></td>
+              <td><%= unit.last_name %></td>
+              <td><%= unit.unit_no %></td>
+              <td><%= unit.unit_area %> sqm</td>
+              <td class="text-nowrap">
+                <a
+                  href="/units/edit/<%= unit.unit_id %>"
+                  class="btn btn-primary btn-sm me-2"
+                  >Edit</a
+                >
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } else { %>
+      <div class="alert alert-info text-center" role="alert">
+        No units found. <a href="/units/add" class="alert-link">Add one now!</a>
+      </div>
+      <% } %>
+    </div>
+  </body>
+</html>

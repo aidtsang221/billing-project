@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import path from "path";
 import bldgRoutes from "./routes/bldgRoutes.js";
+import unitRoutes from "./routes/unitRoutes.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/bldgs", bldgRoutes);
+app.use("/units", unitRoutes);
 
 const port = process.env.PORT || 3000;
 

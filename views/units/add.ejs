@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add New Unit</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">Add New Unit</h1>
+
+      <form action="/units" method="POST">
+        <div class="mb-3">
+          <label for="bldg_id" class="form-label">Building:</label>
+          <select class="form-select" id="bldg_id" name="bldg_id" required>
+            <option value="">-- Select a Building --</option>
+            <% bldgs.forEach(bldg => { %>
+            <option value="<%= bldg.bldg_id %>"><%= bldg.bldg_name %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="first_name" class="form-label">First Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="first_name"
+            name="first_name"
+            placeholder="Enter first name"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="last_name" class="form-label">Last Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="last_name"
+            name="last_name"
+            placeholder="Enter last name"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="unit_no" class="form-label">Unit Number:</label>
+          <input
+            type="number"
+            class="form-control"
+            id="unit_no"
+            name="unit_no"
+            placeholder="e.g., 101"
+            required
+            min="1"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="unit_area" class="form-label">Unit Area (sqm):</label>
+          <input
+            type="number"
+            class="form-control"
+            id="unit_area"
+            name="unit_area"
+            placeholder="e.g., 800"
+            required
+            min="1"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-success">Add Unit</button>
+        <a href="/units" class="btn btn-secondary ms-2">Cancel</a>
+      </form>
+
+      <div class="mt-4 text-center">
+        <a href="/units">Back to Unit List</a>
+      </div>
+    </div>
+  </body>
+</html>
