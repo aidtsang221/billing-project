@@ -11,7 +11,8 @@ User Story:
 - Wants a way to **generate a billing summary**
 - Wants to see **total of unpaid** in all units
 
-Optional:
+Optional (Or Future Features):
 
+- Wants a way to **adjust billing by inputting amounts** to be added or subtracted to the total amount upon generating the bill. (Adjustment Tab)
 - Wants a way to **print billing in Mandarin Chinese**
 - Wants to **change language** of website **to Mandarin Chinese**

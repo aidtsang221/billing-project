@@ -21,26 +21,36 @@
           <thead class="table-dark">
             <tr>
               <th>Building</th>
-              <th>First Name</th>
-              <th>Last Name</th>
               <th>Unit No.</th>
               <th>Unit Area</th>
               <th>Actions</th>
+              <th>Tenant Management</th>
             </tr>
           </thead>
           <tbody>
             <% units.forEach(unit => { %>
             <tr>
               <td><%= unit.bldg_name %></td>
-              <td><%= unit.first_name %></td>
-              <td><%= unit.last_name %></td>
               <td><%= unit.unit_no %></td>
               <td><%= unit.unit_area %> sqm</td>
               <td class="text-nowrap">
+                <!--Edit - To be Added-->
                 <a
                   href="/units/edit/<%= unit.unit_id %>"
                   class="btn btn-primary btn-sm me-2"
                   >Edit</a
+                >
+              </td>
+              <td class="text-nowrap">
+                <a
+                  href="/units/<%= unit.unit_id %>/tenants/add"
+                  class="btn btn-link btn-sm me-2"
+                  >Add Tenant</a
+                >
+                <a
+                  href="/units/<%= unit.unit_id %>/tenants"
+                  class="btn btn-link btn-sm"
+                  >View Tenants</a
                 >
               </td>
             </tr>

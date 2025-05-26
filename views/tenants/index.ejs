@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tenant Management</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      .card-body {
+        padding: 1.5rem;
+      }
+      .card-title {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+      }
+      .card-subtitle {
+        margin-bottom: 1rem;
+        color: #6c757d;
+      }
+      .card-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .card-actions .btn {
+        flex-grow: 1;
+      }
+      .btn-billing {
+        background-color: #20c997;
+        border-color: #20c997;
+        color: white;
+      }
+      .btn-billing:hover {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">Tenant Management</h1>
+
+      <div class="d-flex justify-content-between mb-3">
+        <a href="/units" class="btn btn-secondary">Back to Unit List</a>
+        <a href="/units/<%= unit.unit_id %>/tenants/add" class="btn btn-success"
+          >Add New Tenant</a
+        >
+      </div>
+
+      <% if (tenants.length > 0) { %>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <% tenants.forEach(tenant => { %>
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                <%= tenant.first_name %> <%= tenant.last_name %>
+              </h5>
+              <h6 class="card-subtitle mb-2">
+                Unit: <%= unit.unit_no %> (Building: <%= unit.bldg_name %>)
+              </h6>
+              <hr />
+              <div class="card-actions">
+                <!-- Billing CRUD Button -->
+                <a
+                  href="/tenants/<%= tenant.tenant_id %>/billings"
+                  class="btn btn-billing"
+                  >Go to Billing</a
+                >
+
+                <!-- <a
+                  href="/units/<%= unit.unit_id %>/tenants/edit/<%= tenant.tenant_id %>"
+                  class="btn btn-primary"
+                  >Edit</a
+                > -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div class="alert alert-info text-center" role="alert">
+        No tenants found for this unit.
+        <a href="/units/<%= unit.unit_id %>/tenants/add" class="alert-link"
+          >Add one now!</a
+        >
+      </div>
+      <% } %>
+    </div>
+  </body>
+</html>

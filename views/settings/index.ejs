@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">Settings</h1>
+
+      <div class="d-flex justify-content-between mb-3">
+        <a href="/" class="btn btn-secondary">Back to Home</a>
+        <a href="/settings/add" class="btn btn-success">Add New Settings</a>
+      </div>
+
+      <% if (settings.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Association Dues Amt</th>
+              <th>Utility Consumption Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% settings.forEach(setting => { %>
+            <tr>
+              <td><%= setting.assoc_amount %></td>
+              <td><%= setting.util_rate_consump %></td>
+              <td class="text-nowrap">
+                <!--Edit functionality is to be added
+                No need for Delete
+                -->
+                <!-- <a
+                  href="/settings/edit/<%= settings.setting_id %>"
+                  class="btn btn-primary btn-sm me-2"
+                  >Edit</a
+                >
+                 -->
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } else { %>
+      <div class="alert alert-info text-center" role="alert">
+        No settings found.
+        <a href="/settings/add" class="alert-link">Add one now!</a>
+      </div>
+      <% } %>
+    </div>
+  </body>
+</html>

@@ -32,17 +32,13 @@ export const showAddForm = async (req, res) => {
 
 // Create New Building
 export const addUnit = async (req, res) => {
-  const { bldg_id, first_name, last_name, unit_no, unit_area } = req.body;
+  const { bldg_id, unit_no, unit_area } = req.body;
 
   // Basic validation
   if (
     !bldg_id ||
-    !first_name ||
-    !last_name ||
     !unit_no ||
     !unit_area ||
-    first_name.trim() === "" ||
-    last_name.trim() === "" ||
     isNaN(unit_no) ||
     isNaN(unit_area)
   ) {
@@ -53,8 +49,8 @@ export const addUnit = async (req, res) => {
 
   try {
     await pool.query(
-      "INSERT INTO unit (bldg_id, first_name, last_name, unit_no, unit_area) VALUES (?, ?, ?, ?, ?)",
-      [bldg_id, first_name.trim(), last_name.trim(), unit_no, unit_area]
+      "INSERT INTO unit (bldg_id, unit_no, unit_area) VALUES (?, ?, ?)",
+      [bldg_id, unit_no, unit_area]
     );
     res.redirect("/units");
   } catch (error) {

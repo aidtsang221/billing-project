@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Settings</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">Add New Setting</h1>
+
+      <form action="/settings" method="POST">
+        <div class="mb-3">
+          <label for="assoc_amount" class="form-label"
+            >Association Dues Amount:</label
+          >
+          <input
+            type="number"
+            class="form-control"
+            id="assoc_amount"
+            name="assoc_amount"
+            placeholder="e.g., 40,000"
+            required
+            min="1"
+          />
+          PHP
+        </div>
+
+        <div class="mb-3">
+          <label for="util_rate_consump" class="form-label"
+            >Consumption Rate (Water/Electricity):</label
+          >
+          <input
+            type="number"
+            class="form-control"
+            id="util_rate_consump"
+            name="util_rate_consump"
+            placeholder="e.g., 42"
+            required
+            min="1"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-success">Add Setting</button>
+        <a href="/settings" class="btn btn-secondary ms-2">Cancel</a>
+      </form>
+
+      <div class="mt-4 text-center">
+        <a href="/settings">Back to Settings</a>
+      </div>
+    </div>
+  </body>
+</html>

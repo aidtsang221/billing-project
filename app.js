@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import path from "path";
 import bldgRoutes from "./routes/bldgRoutes.js";
 import unitRoutes from "./routes/unitRoutes.js";
+import tenantRoutes from "./routes/tenantRoutes.js";
+import settingRoutes from "./routes/settingRoutes.js";
 
 dotenv.config();
 
@@ -12,7 +14,8 @@ const __dirname = import.meta.dirname;
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -28,6 +31,8 @@ app.get("/", (req, res) => {
 
 app.use("/bldgs", bldgRoutes);
 app.use("/units", unitRoutes);
+app.use("/settings", settingRoutes);
+app.use("/units/:unitId/tenants", tenantRoutes);
 
 const port = process.env.PORT || 3000;
 
