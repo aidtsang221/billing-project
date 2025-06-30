@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Association Dues</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container mt-5">
+      <h1 class="mb-4 text-center">List of Association Dues</h1>
+
+      <div class="d-flex justify-content-between mb-3">
+        <a href="/" class="btn btn-secondary">Back to Home</a>
+        <div>
+          <a
+            href="/assocBills/add/<%= unitInfo.unit_id %>"
+            class="btn btn-primary me-2"
+            >Create Association Dues</a
+          >
+        </div>
+      </div>
+
+      <!-- Association Dues Section -->
+      <% if (assocDues.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Tenant</th>
+              <th>Unit No.</th>
+              <th>AR No.</th>
+              <th>Adjustment Fee</th>
+              <th>Amount Paid</th>
+              <th>Total Amount Due</th>
+              <th>Period</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% assocDues.forEach(bill => { %> <% const balance =
+            bill.final_amount - bill.amt_paid %>
+            <tr>
+              <td><%= bill.tenant_name %></td>
+              <td><%= bill.unit_no %></td>
+              <td><%= bill.ack_no %></td>
+              <td><%= bill.adjustment.toFixed(2) %></td>
+              <td><%= bill.amt_paid.toFixed(2) %></td>
+              <td><strong><%= balance.toFixed(2) %></strong></td>
+              <td>
+                <%= new Date(bill.start_date).toLocaleDateString() %> - <%= new
+                Date(bill.end_date).toLocaleDateString() %>
+              </td>
+              <td><%= new Date(bill.due_date).toLocaleDateString() %></td>
+              <td>
+                <% let statusClass; switch (bill.status.toLowerCase()) { case
+                'paid': statusClass = 'bg-success'; break; case 'unpaid':
+                statusClass = 'bg-danger'; break; case 'partial': statusClass =
+                'bg-warning text-dark'; break; default: statusClass =
+                'bg-secondary'; } %>
+                <span class="badge <%= statusClass %>">
+                  <%= bill.status.charAt(0).toUpperCase() + bill.status.slice(1)
+                  %>
+                </span>
+              </td>
+              <td class="text-nowrap">
+                <a
+                  href="/assocBills/payment/<%= bill.assoc_id %>"
+                  class="btn btn-primary btn-sm me-2"
+                  >Edit Payment</a
+                >
+                <a
+                  href="/assocBills/edit/<%= bill.assoc_id %>"
+                  class="btn btn-primary btn-sm me-2"
+                  >Edit</a
+                >
+                <a
+                  href="/assocBills/<%= bill.assoc_id %>/pdf"
+                  class="btn btn-info btn-sm ms-2"
+                  target="_blank"
+                  >Generate PDF</a
+                >
+                <!-- <form
+                  action="/utility/delete/<%= bill.util_id %>"
+                  method="POST"
+                  class="d-inline"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Are you sure you want to delete this utility bill record?');"
+                  >
+                    Delete
+                  </button>
+                </form> -->
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } else { %>
+      <div class="alert alert-info text-center" role="alert">
+        No Association Dues records found.
+      </div>
+      <% } %>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Setting</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">Edit Setting for <%= setting.bldg_name %></h3>
+            </div>
+            <div class="card-body">
+              <form
+                action="/settings/edit/<%= setting.setting_id %>"
+                method="POST"
+              >
+                <div class="mb-3">
+                  <label class="form-label">Category</label>
+                  <p class="form-control-plaintext">
+                    <strong
+                      ><%= setting.category.replace(/_/g, ' ').replace(/\b\w/g,
+                      c => c.toUpperCase()) %></strong
+                    >
+                  </p>
+                </div>
+
+                <!-- Amount Field (for association_dues) -->
+                <div id="amount-group" class="mb-3 d-none">
+                  <label for="amount" class="form-label">Amount (PHP)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="amount"
+                    value="<%= setting.value %>"
+                  />
+                </div>
+
+                <!-- Rate Field (for utilities) -->
+                <div id="rate-group" class="mb-3 d-none">
+                  <label for="rate" class="form-label">Consumption Rate</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="rate"
+                    value="<%= setting.value %>"
+                  />
+                </div>
+
+                <!-- The hidden input to send the final value -->
+                <input type="hidden" name="value" id="value-input" />
+
+                <div class="d-flex justify-content-between">
+                  <a
+                    href="/settings/<%= setting.bldg_id %>"
+                    class="btn btn-secondary"
+                    >Cancel</a
+                  >
+                  <button type="submit" class="btn btn-primary">
+                    Update Setting
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const amountGroup = document.getElementById("amount-group");
+      const rateGroup = document.getElementById("rate-group");
+      const amountInput = document.getElementById("amount");
+      const rateInput = document.getElementById("rate");
+      const valueInput = document.getElementById("value-input");
+      const form = document.querySelector("form");
+
+      const currentCategory = "<%= setting.category %>";
+
+      if (currentCategory === "association_dues") {
+        amountGroup.classList.remove("d-none");
+        amountInput.required = true;
+      } else if (
+        currentCategory === "water" ||
+        currentCategory === "electricity"
+      ) {
+        rateGroup.classList.remove("d-none");
+        rateInput.required = true;
+      }
+
+      form.addEventListener("submit", () => {
+        if (currentCategory === "association_dues") {
+          valueInput.value = amountInput.value;
+        } else {
+          valueInput.value = rateInput.value;
+        }
+      });
+    </script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

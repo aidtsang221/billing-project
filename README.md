@@ -10,9 +10,9 @@ User Story:
 - Wants to **edit billing** information such as rate of utilities
 - Wants a way to **generate a billing summary**
 - Wants to see **total of unpaid** in all units
+- Wants a way to **adjust billing by inputting amounts** to be added or subtracted to the total amount upon generating the bill. (Adjustment Tab)
 
 Optional (Or Future Features):
 
-- Wants a way to **adjust billing by inputting amounts** to be added or subtracted to the total amount upon generating the bill. (Adjustment Tab)
 - Wants a way to **print billing in Mandarin Chinese**
 - Wants to **change language** of website **to Mandarin Chinese**

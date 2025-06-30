@@ -6,6 +6,8 @@ import bldgRoutes from "./routes/bldgRoutes.js";
 import unitRoutes from "./routes/unitRoutes.js";
 import tenantRoutes from "./routes/tenantRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
+import utilRoutes from "./routes/utilRoutes.js";
+import assocRoutes from "./routes/assocRoutes.js";
 
 dotenv.config();
 
@@ -32,7 +34,9 @@ app.get("/", (req, res) => {
 app.use("/bldgs", bldgRoutes);
 app.use("/units", unitRoutes);
 app.use("/settings", settingRoutes);
-app.use("/units/:unitId/tenants", tenantRoutes);
+app.use("/tenants", tenantRoutes);
+app.use("/utilityBills", utilRoutes);
+app.use("/assocBills", assocRoutes);
 
 const port = process.env.PORT || 3000;
 

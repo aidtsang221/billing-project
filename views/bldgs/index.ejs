@@ -7,8 +7,10 @@
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
+    <%- include('../partials/navbar') %>
+
     <div class="container mt-5">
-      <h1 class="mb-4 text-center">Building Management</h1>
+      <h1 class="mb-4 text-center">Building List</h1>
 
       <div class="d-flex justify-content-between mb-3">
         <a href="/" class="btn btn-secondary">Back to Home</a>
@@ -29,15 +31,16 @@
             <tr>
               <td><%= bldg.bldg_name %></td>
               <td class="text-nowrap">
-                <!--Edit functionality is to be added
-                No need for Delete
-                -->
-                <!-- <a
+                <a
                   href="/bldgs/edit/<%= bldg.bldg_id %>"
                   class="btn btn-primary btn-sm me-2"
                   >Edit</a
                 >
-                 -->
+                <a
+                  href="/settings/<%= bldg.bldg_id %>"
+                  class="btn btn-info btn-sm me-2"
+                  >Settings</a
+                >
               </td>
             </tr>
             <% }); %>
@@ -51,5 +54,7 @@
       </div>
       <% } %>
     </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

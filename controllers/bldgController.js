@@ -35,8 +35,45 @@ export const addBldg = async (req, res) => {
   }
 };
 
-// Display Edit Form - To Be Added
-export const showEditForm = async (req, res) => {};
+// Display Edit Form
+export const showEditForm = async (req, res) => {
+  const bldgId = req.params.id;
 
-// Update Existing Building - To be Added
-export const updateBldg = async (req, res) => {};
+  try {
+    const [rows] = await pool.query("SELECT * FROM bldg WHERE bldg_id = ?", [
+      bldgId,
+    ]);
+    if (rows.length === 0) {
+      return res.status(404).send("Building not found.");
+    }
+    res.render("bldgs/edit", { bldg: rows[0] });
+  } catch (error) {
+    console.error("Error fetching buildings:", error);
+    res.status(500).send("Error loading buildings. Please try again.");
+  }
+};
+
+// Update Existing Building
+export const updateBldg = async (req, res) => {
+  const bldgId = req.params.id;
+  const { bldg_name } = req.body;
+
+  // Basic validation
+  if (!bldg_name || bldg_name.trim() === "") {
+    return res.status(400).send("Building name is required.");
+  }
+
+  try {
+    const [result] = await pool.query(
+      "UPDATE bldg SET bldg_name = ? WHERE bldg_id = ?",
+      [bldg_name.trim(), bldgId]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).send("Building not found or no changes made.");
+    }
+    res.redirect("/bldgs");
+  } catch (error) {
+    console.error("Error updating building:", error);
+    res.status(500).send("Error updating building. Please try again.");
+  }
+};

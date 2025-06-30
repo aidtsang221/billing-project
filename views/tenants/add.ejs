@@ -3,54 +3,109 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Tenant for Unit <%= unit.unit_no %></title>
+    <title>Add New Tenant</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
+    <%- include('../partials/navbar') %>
+
     <div class="container mt-5">
-      <h1 class="mb-4 text-center">
-        Add Tenant for Unit <%= unit.unit_no %> (Building: <%= unit.bldg_name
-        %>)
-      </h1>
+      <div class="card mx-auto" style="max-width: 500px">
+        <div class="card-body">
+          <h1 class="card-title text-center mb-4">Add New Tenant</h1>
 
-      <form action="/units/<%= unit.unit_id %>/tenants" method="POST">
-        <div class="mb-3">
-          <label for="first_name" class="form-label">First Name:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="first_name"
-            name="first_name"
-            placeholder="Enter first name"
-            required
-          />
+          <form action="/tenants" method="POST">
+            <div class="mb-3">
+              <label for="bldg_id" class="form-label">Building:</label>
+              <select id="bldg_id" name="bldg_id" class="form-select" required>
+                <option value="">Select a Building</option>
+                <% buildings.forEach(building => { %>
+                <option value="<%= building.bldg_id %>">
+                  <%= building.bldg_name %>
+                </option>
+                <% }); %>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="unit_id" class="form-label">Unit:</label>
+              <select
+                id="unit_id"
+                name="unit_id"
+                class="form-select"
+                required
+                disabled
+              >
+                <option value="">Select a Unit</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="first_name" class="form-label">First Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="first_name"
+                name="first_name"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="last_name" class="form-label">Last Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="last_name"
+                name="last_name"
+                required
+              />
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-success">Add Tenant</button>
+              <a href="/tenants" class="btn btn-outline-secondary ms-2"
+                >Cancel</a
+              >
+            </div>
+          </form>
         </div>
-
-        <div class="mb-3">
-          <label for="last_name" class="form-label">Last Name:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="last_name"
-            name="last_name"
-            placeholder="Enter last name"
-            required
-          />
-        </div>
-
-        <button type="submit" class="btn btn-success">Add Tenant</button>
-        <a
-          href="/units/<%= unit.unit_id %>/tenants"
-          class="btn btn-secondary ms-2"
-          >Cancel</a
-        >
-      </form>
-
-      <div class="mt-4 text-center">
-        <a href="/units/<%= unit.unit_id %>/tenants"
-          >Back to Tenants List for Unit <%= unit.unit_no %></a
-        >
       </div>
     </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const buildingsData = <%- JSON.stringify(buildings) %>;
+
+      const bldgSelect = document.getElementById("bldg_id");
+      const unitSelect = document.getElementById("unit_id");
+
+      bldgSelect.addEventListener("change", () => {
+        // Parse the selected value to an integer for reliable comparison
+        const selectedBldgId = parseInt(bldgSelect.value);
+
+        // Clear existing options in the unit dropdown and reset to disabled
+        unitSelect.innerHTML = '<option value="">Select a Unit</option>';
+        unitSelect.disabled = true;
+
+        // Check if a valid building ID was selected (not the empty option)
+        if (!isNaN(selectedBldgId)) {
+          // Find the selected building object using strict equality
+          const selectedBuilding = buildingsData.find(
+            (b) => b.bldg_id === selectedBldgId
+          );
+
+          if (selectedBuilding && selectedBuilding.units.length > 0) {
+            // Populate the unit dropdown with units for the selected building
+            selectedBuilding.units.forEach((unit) => {
+              const option = document.createElement("option");
+              option.value = unit.unit_id; // The value sent to the server will be the unit_id
+              option.textContent = unit.unit_no; // Display unit number to the user
+              unitSelect.appendChild(option);
+            });
+            unitSelect.disabled = false; // Enable unit dropdown now that it's populated
+          }
+        }
+      });
+    </script>
   </body>
 </html>

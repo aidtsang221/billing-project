@@ -19,24 +19,16 @@
     </style>
   </head>
   <body>
+    <%- include('partials/navbar') %>
+
     <div class="container mt-5">
       <div class="jumbotron">
-        <h1 class="display-4">Welcome to Billing Project!</h1>
+        <h1 class="display-4">Dashboard</h1>
         <hr class="my-4" />
         <p>Click below to start managing buildings.</p>
-        <a class="btn btn-primary btn-lg" href="/bldgs" role="button"
-          >Go to Buildings List</a
-        >
-        <a class="btn btn-info btn-lg text-white" href="/units" role="button"
-          >Go to Units List</a
-        >
-        <a
-          class="btn btn-warning btn-lg text-dark"
-          href="/settings"
-          role="button"
-          >Settings</a
-        >
       </div>
     </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

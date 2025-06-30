@@ -6,26 +6,6 @@
     <title>Tenant Management</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-      .card-body {
-        padding: 1.5rem;
-      }
-      .card-title {
-        margin-bottom: 0.5rem;
-        font-size: 1.5rem;
-      }
-      .card-subtitle {
-        margin-bottom: 1rem;
-        color: #6c757d;
-      }
-      .card-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        margin-top: 1rem;
-      }
-      .card-actions .btn {
-        flex-grow: 1;
-      }
       .btn-billing {
         background-color: #20c997;
         border-color: #20c997;
@@ -38,56 +18,51 @@
     </style>
   </head>
   <body>
+    <%- include('../partials/navbar') %>
+
     <div class="container mt-5">
-      <h1 class="mb-4 text-center">Tenant Management</h1>
+      <h1 class="mb-4 text-center"><%= tenants[0].bldg_name %> Building %></h1>
 
       <div class="d-flex justify-content-between mb-3">
-        <a href="/units" class="btn btn-secondary">Back to Unit List</a>
-        <a href="/units/<%= unit.unit_id %>/tenants/add" class="btn btn-success"
-          >Add New Tenant</a
-        >
+        <a href="/" class="btn btn-secondary">Back to Home</a>
+        <a href="/tenants/add" class="btn btn-success">Add New Tenant</a>
       </div>
 
       <% if (tenants.length > 0) { %>
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <% tenants.forEach(tenant => { %>
-        <div class="col">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">
-                <%= tenant.first_name %> <%= tenant.last_name %>
-              </h5>
-              <h6 class="card-subtitle mb-2">
-                Unit: <%= unit.unit_no %> (Building: <%= unit.bldg_name %>)
-              </h6>
-              <hr />
-              <div class="card-actions">
-                <!-- Billing CRUD Button -->
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">Tenant Name</th>
+              <th scope="col">Unit</th>
+              <th scope="col" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% tenants.forEach(tenant => { %>
+            <tr>
+              <td><%= tenant.first_name %> <%= tenant.last_name %></td>
+              <td>Unit <%= tenant.unit_no %></td>
+              <td class="text-center text-nowrap">
                 <a
-                  href="/tenants/<%= tenant.tenant_id %>/billings"
-                  class="btn btn-billing"
-                  >Go to Billing</a
-                >
-
-                <!-- <a
-                  href="/units/<%= unit.unit_id %>/tenants/edit/<%= tenant.tenant_id %>"
-                  class="btn btn-primary"
+                  href="/tenants/edit/<%= tenant.tenant_id %>"
+                  class="btn btn-sm btn-primary"
                   >Edit</a
-                > -->
-              </div>
-            </div>
-          </div>
-        </div>
-        <% }); %>
+                >
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
       </div>
       <% } else { %>
       <div class="alert alert-info text-center" role="alert">
-        No tenants found for this unit.
-        <a href="/units/<%= unit.unit_id %>/tenants/add" class="alert-link"
-          >Add one now!</a
-        >
+        No tenants now.
+        <a href="/tenants/add" class="alert-link">Add one now!</a>
       </div>
       <% } %>
     </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

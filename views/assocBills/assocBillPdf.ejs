@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Association Dues Bill PDF</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 1in;
+        font-size: 10pt;
+        color: #333;
+      }
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        color: #2c3e50;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+      }
+      .header,
+      .footer {
+        text-align: center;
+        margin-bottom: 1.5em;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1em;
+      }
+      .footer {
+        margin-top: 2em;
+        border-top: 1px solid #eee;
+        border-bottom: none;
+        padding-top: 1em;
+        font-size: 8pt;
+        color: #777;
+      }
+      .bill-details p {
+        margin-bottom: 0.3em;
+      }
+      .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5em;
+      }
+      .summary-table th,
+      .summary-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      .summary-table th {
+        background-color: #f2f2f2;
+      }
+      .total-amount {
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: right;
+        margin-top: 1em;
+      }
+      .text-muted {
+        color: #6c757d !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>Association Dues Bill</h2>
+        <h3><%= assoc.bldg_name %></h3>
+        <p>Unit <%= assoc.unit_no %></p>
+        <p>Tenant: <%= assoc.first_name %> <%= assoc.last_name %></p>
+      </div>
+
+      <div class="bill-details mb-4">
+        <p>
+          <strong>Bill Period:</strong> <%= new
+          Date(assoc.start_date).toLocaleDateString('en-US', { year: 'numeric',
+          month: 'long', day: 'numeric' }) %> to <%= new
+          Date(assoc.end_date).toLocaleDateString('en-US', { year: 'numeric',
+          month: 'long', day: 'numeric' }) %>
+        </p>
+        <p>
+          <strong>Due Date:</strong> <%= new
+          Date(assoc.due_date).toLocaleDateString('en-US', { year: 'numeric',
+          month: 'long', day: 'numeric' }) %>
+        </p>
+        <p>
+          <strong>Status:</strong> <%= assoc.status.charAt(0).toUpperCase() +
+          assoc.status.slice(1) %>
+        </p>
+      </div>
+
+      <h4 class="mt-4 mb-3">Charges Breakdown</h4>
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Association Dues Rate</td>
+            <td><%= assoc.amount %></td>
+          </tr>
+          <tr>
+            <td>Adjustment Fee</td>
+            <td>₱ <%= assoc.adjustment %></td>
+          </tr>
+          <tr>
+            <td>Total Amount</td>
+            <td>₱ <%= assoc.final_amount %></td>
+          </tr>
+          <tr>
+            <td>Amount Paid</td>
+            <td>₱ <%= assoc.amt_paid %></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="total-amount mt-4">
+        Total Amount Due:
+        <span style="font-size: 1.5em"
+          >₱<%= assoc.remaining_balance.toFixed(2) %></span
+        >
+      </div>
+
+      <div class="footer">
+        <p><%= new Date().toLocaleString() %></p>
+      </div>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

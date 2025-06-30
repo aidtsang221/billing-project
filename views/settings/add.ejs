@@ -10,45 +10,110 @@
     <div class="container mt-5">
       <h1 class="mb-4 text-center">Add New Setting</h1>
 
-      <form action="/settings" method="POST">
+      <form action="/settings/<%= bldg.bldg_id %>" method="POST">
         <div class="mb-3">
-          <label for="assoc_amount" class="form-label"
-            >Association Dues Amount:</label
-          >
+          <label for="category" class="form-label">Category</label>
+          <select class="form-select" id="category" name="category" required>
+            <option value="" selected disabled>-- Select a Category --</option>
+            <% categories.forEach(category => { %>
+            <option value="<%= category %>">
+              <%= category.replace(/_/g, ' ').replace(/\b\w/g, c =>
+              c.toUpperCase()) %>
+            </option>
+            <% }); %>
+          </select>
+        </div>
+
+        <!-- This div will be shown for 'association_dues' -->
+        <div id="amount-group" class="mb-3 d-none">
+          <label for="amount" class="form-label">Amount (PHP)</label>
           <input
             type="number"
             class="form-control"
-            id="assoc_amount"
-            name="assoc_amount"
-            placeholder="e.g., 40,000"
-            required
-            min="1"
+            id="amount"
+            placeholder="e.g., 1500.00"
           />
-          PHP
         </div>
 
-        <div class="mb-3">
-          <label for="util_rate_consump" class="form-label"
-            >Consumption Rate (Water/Electricity):</label
-          >
+        <!-- This div will be shown for 'water' or 'electricity' -->
+        <div id="rate-group" class="mb-3 d-none">
+          <label for="rate" class="form-label">Consumption Rate</label>
           <input
             type="number"
             class="form-control"
-            id="util_rate_consump"
-            name="util_rate_consump"
-            placeholder="e.g., 42"
-            required
-            min="1"
+            id="rate"
+            placeholder="e.g., 150"
           />
         </div>
 
-        <button type="submit" class="btn btn-success">Add Setting</button>
-        <a href="/settings" class="btn btn-secondary ms-2">Cancel</a>
+        <!-- This is a hidden input that will hold the final value to be submitted -->
+        <input type="hidden" name="value" id="value-input" />
+
+        <button type="submit" class="btn btn-success" id="submit-btn">
+          Add Setting
+        </button>
+        <a href="/settings/<%= bldg.bldg_id %>" class="btn btn-secondary ms-2"
+          >Cancel</a
+        >
       </form>
 
       <div class="mt-4 text-center">
-        <a href="/settings">Back to Settings</a>
+        <a href="/settings/<%= bldg.bldg_id %>">Back to Settings</a>
       </div>
     </div>
+
+    <script>
+      const category = document.getElementById("category");
+
+      const amountGroup = document.getElementById("amount-group");
+      const amountInput = document.getElementById("amount");
+
+      const rateGroup = document.getElementById("rate-group");
+      const rateInput = document.getElementById("rate");
+
+      const valueInput = document.getElementById("value-input");
+
+      const form = document.querySelector("form");
+
+      const submitBtn = document.getElementById("submit-btn");
+
+      category.addEventListener("change", () => {
+        const selectedCategory = category.value;
+
+        amountGroup.classList.add("d-none");
+        rateGroup.classList.add("d-none");
+
+        amountInput.required = false;
+        rateInput.required = false;
+
+        submitBtn.disabled = true;
+
+        if (selectedCategory === "association_dues") {
+          amountGroup.classList.remove("d-none");
+          amountInput.required = true;
+        } else if (
+          selectedCategory === "water" ||
+          selectedCategory === "electricity"
+        ) {
+          rateGroup.classList.remove("d-none");
+          rateInput.required = true;
+        }
+
+        if (selectedCategory) {
+          submitBtn.disabled = false;
+        }
+      });
+
+      form.addEventListener("submit", () => {
+        const selectedCategory = category.value;
+
+        if (selectedCategory === "association_dues") {
+          valueInput.value = amountInput.value;
+        } else {
+          valueInput.value = rateInput.value;
+        }
+      });
+    </script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

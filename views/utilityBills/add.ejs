@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Utility Bills</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container mt-5">
+      <div class="card p-4 shadow-sm">
+        <h1 class="mb-4 text-center">
+          Create Utility Bill for Unit <%= unitInfo.unit_no %>
+        </h1>
+
+        <form action="/utilityBills/<%= unitInfo.unit_id %>" method="POST">
+          <input type="hidden" id="utilSettingId" name="utilSettingId" />
+          <input type="hidden" id="total_amt" name="total_amt" />
+
+          <div class="row">
+            <!-- Utility Type Selection -->
+            <div class="col-md-6 mb-3">
+              <label for="utilityType" class="form-label">Utility Type</label>
+              <select id="utilityType" class="form-select" required>
+                <option value="" selected disabled>
+                  -- Select a Utility --
+                </option>
+                <% if (rates.water) { %>
+                <option value="water">Water</option>
+                <% } %> <% if (rates.electricity) { %>
+                <option value="electricity">Electricity</option>
+                <% } %>
+              </select>
+              <% if (!rates.water && !rates.electricity) { %>
+              <div class="form-text text-danger">
+                No water or electricity rates have been configured for this
+                building in settings.
+              </div>
+              <% } %>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="rate" class="form-label">Utility Bill Rate:</label>
+              <input
+                type="number"
+                class="form-control"
+                id="rate"
+                name="rate"
+                readonly
+                disabled
+              />
+            </div>
+          </div>
+
+          <!-- Total Display Area -->
+          <div class="alert alert-info text-center" role="alert">
+            <h4 class="alert-heading">Total Amount Due</h4>
+            <p class="mb-0 fs-2 fw-bold">
+              ₱<span id="totalAmountDisplay">0.00</span>
+            </p>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="prev_reading" class="form-label"
+                >Previous Reading:</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="prev_reading"
+                name="prev_reading"
+                placeholder="e.g., 1500"
+                required
+                step="0.01"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="curr_reading" class="form-label"
+                >Current Reading:</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="curr_reading"
+                name="curr_reading"
+                placeholder="e.g., 1650"
+                required
+                step="0.01"
+              />
+              <div class="invalid-feedback">
+                Current reading cannot be less than previous reading.
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="start_date" class="form-label"
+                >Billing Period Start:</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="start_date"
+                name="start_date"
+                required
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="end_date" class="form-label"
+                >Billing Period End:</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="end_date"
+                name="end_date"
+                required
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="due_date" class="form-label">Due Date:</label>
+              <input
+                type="date"
+                class="form-control"
+                id="due_date"
+                name="due_date"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4">
+            <a
+              href="/utilityBills/<%= unitInfo.unit_id %>"
+              class="btn btn-secondary me-2"
+              >Cancel</a
+            >
+            <button type="submit" class="btn btn-primary">Generate Bill</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Client-side script for dynamic calculation -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const ratesData = {
+          water: <%- JSON.stringify(rates.water || null) %>,
+          electricity: <%- JSON.stringify(rates.electricity || null) %>,
+        };
+
+        const utilityTypeSelect = document.getElementById("utilityType");
+        const rateInput = document.getElementById("rate");
+        const utilSettingIdInput = document.getElementById("utilSettingId");
+        const prevReadingInput = document.getElementById("prev_reading");
+        const currReadingInput = document.getElementById("curr_reading");
+        const totalAmountDisplay = document.getElementById("totalAmountDisplay");
+        const totalAmountHiddenInput = document.getElementById("total_amt");
+
+        function calculateAndDisplayTotal() {
+          const rate = parseFloat(rateInput.value) || 0;
+          const prevReading = parseFloat(prevReadingInput.value) || 0;
+          const currReading = parseFloat(currReadingInput.value) || 0;
+
+          if (currReading > 0 && currReading < prevReading) {
+            currReadingInput.classList.add("is-invalid");
+            totalAmountDisplay.textContent = "0.00";
+            totalAmountHiddenInput.value = "0.00";
+            return;
+          } else {
+            currReadingInput.classList.remove("is-invalid");
+          }
+
+          const consumption = currReading - prevReading;
+          const total = consumption * rate;
+
+          totalAmountDisplay.textContent = total.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+          totalAmountHiddenInput.value = total.toFixed(2);
+        }
+
+        utilityTypeSelect.addEventListener("change", function () {
+          const selectedType = this.value;
+          const selectedRateData = ratesData[selectedType];
+
+          if (selectedRateData) {
+            rateInput.value = selectedRateData.rate;
+            utilSettingIdInput.value = selectedRateData.utilSettingId;
+          } else {
+            rateInput.value = "";
+            utilSettingIdInput.value = "";
+          }
+          calculateAndDisplayTotal();
+        });
+
+        prevReadingInput.addEventListener("input", calculateAndDisplayTotal);
+        currReadingInput.addEventListener("input", calculateAndDisplayTotal);
+      });
+    </script>
+  </body>
+</html>

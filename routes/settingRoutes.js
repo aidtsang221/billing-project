@@ -3,10 +3,14 @@ import * as settingController from "../controllers/settingController.js";
 
 const router = express.Router();
 
-router.get("/", settingController.getAllSettings);
+router.get("/:bldgId", settingController.getAllSettings);
 
-router.get("/add", settingController.showAddSettingForm);
+router.get("/add/:bldgId", settingController.showAddSettingForm);
 
-router.post("/", settingController.addSetting);
+router.post("/:bldgId", settingController.addSetting);
+
+router.get("/edit/:settingId", settingController.showEditSettingsForm);
+
+router.post("/edit/:settingId", settingController.updateSettings);
 
 export default router;

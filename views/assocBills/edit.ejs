@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Association Dues</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container mt-5">
+      <div class="card p-4 shadow-sm">
+        <h1 class="mb-4 text-center">
+          Edit Association Dues Bill for Unit <%= assocDues.unit_no %>
+        </h1>
+
+        <form action="/assocBills/edit/<%= assocDues.assoc_id %>" method="POST">
+          <input
+            type="hidden"
+            name="unit_id"
+            value="<%= assocDues.unit_id %>"
+          />
+          <div class="mb-3">
+            <label for="amount" class="form-label"
+              >Association Dues Amount:</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              id="duesRate"
+              name="duesRate"
+              value="<%= assocDues.amount %>"
+              required
+              disabled
+            />
+          </div>
+
+          <!-- Total Display Area -->
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">Total Amount Due</h4>
+            <p class="mb-0 fs-3 fw-bold">
+              ₱ <span id="totalAmountDisplay">0.00</span>
+            </p>
+          </div>
+
+          <div class="row">
+            <div class="mb-3">
+              <label for="adjustment" class="form-label">Adjustment Fee:</label>
+              <input
+                type="number"
+                class="form-control"
+                id="adjustment"
+                name="adjustment"
+                value="<%= assocDues.adjustment %>"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="start_date" class="form-label"
+                >Billing Period Start:</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="start_date"
+                name="start_date"
+                value="<%= assocDues.start_date %>"
+                required
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="end_date" class="form-label"
+                >Billing Period End:</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="end_date"
+                name="end_date"
+                value="<%= assocDues.end_date %>"
+                required
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="due_date" class="form-label">Due Date:</label>
+              <input
+                type="date"
+                class="form-control"
+                id="due_date"
+                name="due_date"
+                value="<%= assocDues.due_date %>"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4">
+            <a
+              href="/assocBills/<%= assocDues.unit_id %>"
+              class="btn btn-secondary me-2"
+              >Cancel</a
+            >
+            <button type="submit" class="btn btn-success">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Client-side script for dynamic calculation -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const duesRateInput = document.getElementById("duesRate");
+        const totalAmountDisplay = document.getElementById("totalAmountDisplay");
+
+        const unitArea = <%= assocDues.unit_area %>;
+
+        function calculateAndDisplayTotal() {
+          const rate = parseFloat(duesRateInput.value) || 0;
+          const total = rate * unitArea;
+
+          totalAmountDisplay.textContent = total.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+          totalAmountHiddenInput.value = total.toFixed(2);
+        }
+
+        duesRateInput.addEventListener("input", calculateAndDisplayTotal);
+
+        calculateAndDisplayTotal();
+      });
+    </script>
+  </body>
+</html>
