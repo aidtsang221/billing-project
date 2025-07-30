@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Tenant</title>
+    <title>Edit Owner</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
 <body class="bg-light">
@@ -13,15 +13,15 @@
 
     <!-- Back Button -->
     <div class="mb-3">
-      <a href="/tenants" class="btn btn-outline-secondary">
+      <a href="/owners" class="btn btn-outline-secondary">
         Back
       </a>
     </div>
 
-    <h2 class="mb-4">Edit Tenant</h2>
+    <h2 class="mb-4">Edit Owner</h2>
 
-    <!-- Edit Tenant Form -->
-    <form action="/tenants/edit/<%= tenant.tenant_id %>" method="POST" class="card p-4 shadow-sm">
+    <!-- Edit Owner Form -->
+    <form action="/owners/edit/<%= owner.owner_id %>" method="POST" class="card p-4 shadow-sm">
 
       <!-- First Name -->
       <div class="mb-3">
@@ -31,7 +31,7 @@
           class="form-control" 
           id="first_name" 
           name="first_name" 
-          value="<%= tenant.first_name %>" 
+          value="<%= owner.first_name %>" 
           required>
       </div>
 
@@ -43,7 +43,7 @@
           class="form-control" 
           id="last_name" 
           name="last_name" 
-          value="<%= tenant.last_name %>" 
+          value="<%= owner.last_name %>" 
           required>
       </div>
 
@@ -56,7 +56,7 @@
               <% building.units.forEach(unit => { %>
                 <option 
                   value="<%= unit.unit_id %>" 
-                  <%= unit.unit_id === tenant.unit_id ? 'selected' : '' %>>
+                  <%= unit.unit_id === owner.unit_id ? 'selected' : '' %>>
                   Unit <%= unit.unit_no %>
                 </option>
               <% }) %>
@@ -67,8 +67,8 @@
 
       <!-- Buttons -->
       <div class="d-flex justify-content-between">
-        <button type="submit" class="btn btn-primary">Update Tenant</button>
-        <a href="/tenants" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Update Owner</button>
+        <a href="/owners" class="btn btn-secondary">Cancel</a>
       </div>
 
     </form>

@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 import bldgRoutes from "./routes/bldgRoutes.js";
 import unitRoutes from "./routes/unitRoutes.js";
-import tenantRoutes from "./routes/tenantRoutes.js";
+import ownerRoutes from "./routes/ownerRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import utilRoutes from "./routes/utilRoutes.js";
 import assocRoutes from "./routes/assocRoutes.js";
@@ -31,10 +31,21 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+function formatDateForInput(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// Available to EJS
+app.locals.formatDateForInput = formatDateForInput;
+
 app.use("/bldgs", bldgRoutes);
 app.use("/units", unitRoutes);
 app.use("/settings", settingRoutes);
-app.use("/tenants", tenantRoutes);
+app.use("/owners", ownerRoutes);
 app.use("/utilityBills", utilRoutes);
 app.use("/assocBills", assocRoutes);
 

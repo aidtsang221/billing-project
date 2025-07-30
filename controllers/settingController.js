@@ -20,7 +20,10 @@ export const getAllSettings = async (req, res) => {
         s.setting_id,
         s.category,
         b.bldg_name,
-        COALESCE(ad.amount, us.rate) AS value
+        COALESCE(ad.amount, us.rate) AS value,
+        COALESCE(ad.start_date, us.start_date) AS start_date,
+        COALESCE(ad.end_date, us.end_date) AS end_date,
+        COALESCE(ad.due_date, us.due_date) AS due_date
       FROM settings s
       JOIN bldg b ON s.bldg_id = b.bldg_id
       LEFT JOIN assocdues_settings ad ON s.setting_id = ad.setting_id
@@ -37,16 +40,12 @@ export const getAllSettings = async (req, res) => {
 };
 
 export const showAddSettingForm = async (req, res) => {
-  /*
-  If it's assoc dues, insert into assoc settings table.
-  If it's water or electricity, insert into utility settings table.
-  */
   const bldgId = req.params.bldgId;
   try {
     const bldg = await getBldgById(bldgId);
 
     //Display list of categories in create form
-    const categories = ["association_dues", "water", "electricity"];
+    const categories = ["association_dues", "water", "electricity", "internet"];
 
     res.render("settings/add", { categories, bldg });
   } catch (error) {
@@ -57,10 +56,14 @@ export const showAddSettingForm = async (req, res) => {
 
 export const addSetting = async (req, res) => {
   const bldgId = req.params.bldgId;
-  const { category, value } = req.body;
+  const { category, value, start_date, end_date, due_date } = req.body;
 
-  if (!category || !value) {
-    return res.status(400).send("Category and Value are required.");
+  if (!category || !value || !start_date || !end_date || !due_date) {
+    return res
+      .status(400)
+      .send(
+        "Category, Value, Start date, End date, and due date are required."
+      );
   }
 
   const connection = await pool.getConnection();
@@ -76,13 +79,17 @@ export const addSetting = async (req, res) => {
 
     if (category === "association_dues") {
       await connection.execute(
-        `INSERT INTO assocdues_settings (setting_id, amount, created_at, updated_at) VALUES (?, ?, NOW(), NOW())`,
-        [settingId, value]
+        `INSERT INTO assocdues_settings (setting_id, amount, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+        [settingId, value, start_date, end_date, due_date]
       );
-    } else if (category === "water" || category === "electricity") {
+    } else if (
+      category === "water" ||
+      category === "electricity" ||
+      category === "internet"
+    ) {
       await connection.execute(
-        `INSERT INTO utility_settings (setting_id, rate, created_at, updated_at) VALUES (?, ?, NOW(), NOW())`,
-        [settingId, value]
+        `INSERT INTO utility_settings (setting_id, rate, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+        [settingId, value, start_date, end_date, due_date]
       );
     }
 
@@ -107,7 +114,10 @@ export const showEditSettingsForm = async (req, res) => {
         s.category,
         s.bldg_id,
         b.bldg_name,
-        COALESCE(ad.amount, us.rate) AS value
+        COALESCE(ad.amount, us.rate) AS value,
+        COALESCE(ad.start_date, us.start_date) AS start_date,
+        COALESCE(ad.end_date, us.end_date) AS end_date,
+        COALESCE(ad.due_date, us.due_date) AS due_date
       FROM settings s
       JOIN bldg b ON s.bldg_id = b.bldg_id
       LEFT JOIN assocdues_settings ad ON s.setting_id = ad.setting_id
@@ -121,21 +131,23 @@ export const showEditSettingsForm = async (req, res) => {
       return res.status(404).send("Setting not found.");
     }
 
-    res.render("settings/edit", { setting: rows[0] });
+    const setting = rows[0];
+
+    res.render("settings/edit", { setting });
   } catch (error) {
     console.error("Error loading edit setting form:", error);
     res.status(500).send("Error loading the page. Please try again.");
   }
 };
 
-//Update Settings - to be revised
+//Update Settings
 export const updateSettings = async (req, res) => {
   const settingId = req.params.settingId;
-  const { value } = req.body;
+  const { value, start_date, end_date, due_date } = req.body;
 
   // Basic validation
-  if (!value) {
-    return res.status(400).send("Value is required.");
+  if (!value || !start_date || !end_date || !due_date) {
+    return res.status(400).send("All fields are required.");
   }
 
   const connection = await pool.getConnection();
@@ -155,13 +167,17 @@ export const updateSettings = async (req, res) => {
 
     if (category === "association_dues") {
       await connection.execute(
-        `UPDATE assocdues_settings SET amount = ?, updated_at = NOW() WHERE setting_id = ?`,
-        [value, settingId]
+        `UPDATE assocdues_settings SET amount = ?, start_date = ?, end_date = ?, due_date = ?, updated_at = NOW() WHERE setting_id = ?`,
+        [value, start_date, end_date, due_date, settingId]
       );
-    } else if (category === "water" || category === "electricity") {
+    } else if (
+      category === "water" ||
+      category === "electricity" ||
+      category === "internet"
+    ) {
       await connection.execute(
-        `UPDATE utility_settings SET rate = ?, updated_at = NOW() WHERE setting_id = ?`,
-        [value, settingId]
+        `UPDATE utility_settings SET rate = ?, start_date = ?, end_date = ?, due_date = ?, updated_at = NOW() WHERE setting_id = ?`,
+        [value, start_date, end_date, due_date, settingId]
       );
     }
 

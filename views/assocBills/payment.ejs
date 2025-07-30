@@ -20,7 +20,7 @@
                 <div class="col-md-6">
                   <p><strong>Building:</strong> <%= assocDues.bldg_name %></p>
                   <p><strong>Unit:</strong> <%= assocDues.unit_no %></p>
-                  <p><strong>Tenant:</strong> <%= assocDues.tenant_name %></p>
+                  <p><strong>Owner:</strong> <%= assocDues.owner_name %></p>
                 </div>
                 <div class="col-md-6">
                   <p>
@@ -67,9 +67,10 @@
                   <div class="text-center p-3 border rounded bg-light">
                     <h6 class="text-muted">Remaining Balance</h6>
                     <h4 class="text-danger">
-                      ₱<%=
+                      <% if (assocDues.remaining_balance > 0) { %> ₱<%=
                       parseFloat(assocDues.remaining_balance).toLocaleString('en-PH',
-                      {minimumFractionDigits: 2}) %>
+                      {minimumFractionDigits: 2}) %> <% } else { %> ₱0.00 <% }
+                      %>
                     </h4>
                   </div>
                 </div>
@@ -112,7 +113,6 @@
                           id="payment_amount"
                           name="payment_amount"
                           min="1.00"
-                          max="<%= assocDues.remaining_balance %>"
                           required
                         />
                       </div>
@@ -121,6 +121,18 @@
                         parseFloat(assocDues.remaining_balance).toLocaleString('en-PH',
                         {minimumFractionDigits: 2}) %>
                       </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="date_paid" class="form-label"
+                        >Payment Date</label
+                      >
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="date_paid"
+                        name="date_paid"
+                        required
+                      />
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -151,9 +163,7 @@
                   >
                     ← Back to Bills
                   </a>
-                  <button type="submit" class="btn btn-success">
-                    ✓ Process Payment
-                  </button>
+                  <button type="submit" class="btn btn-success">Submit</button>
                 </div>
               </form>
             </div>
@@ -181,26 +191,19 @@
 
     <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
-      const paymentForm = document.getElementById('paymentForm');
+      const paymentForm = document.getElementById("paymentForm");
 
       // Form validation
-      paymentForm.addEventListener('submit', function(e) {
-          const paymentAmount = document.getElementById('payment_amount').value;
-          const maxAmount = <%= assocDues.remaining_balance %>;
+      paymentForm.addEventListener("submit", function (e) {
+        const paymentAmount = document.getElementById("payment_amount").value;
 
-          if (paymentAmount > maxAmount) {
-              e.preventDefault();
-              alert(`Payment amount cannot exceed the remaining balance of ₱${maxAmount.toFixed(2)}`);
-              return false;
-          }
+        if (paymentAmount <= 0) {
+          e.preventDefault();
+          alert("Payment amount must be greater than zero");
+          return false;
+        }
 
-          if (paymentAmount <= 0) {
-              e.preventDefault();
-              alert('Payment amount must be greater than zero');
-              return false;
-          }
-
-          return confirm(`Confirm payment of ₱${paymentAmount.toFixed(2)}?`);
+        return confirm(`Confirm payment of ₱${paymentAmount.toFixed(2)}?`);
       });
     </script>
   </body>

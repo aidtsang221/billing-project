@@ -9,4 +9,8 @@ router.get("/add", unitController.showAddForm);
 
 router.post("/", unitController.addUnit);
 
+router.get("/edit/:unitId", unitController.showEditForm);
+
+router.post("/edit/:unitId", unitController.updateUnit);
+
 export default router;

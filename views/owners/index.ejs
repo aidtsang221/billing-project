@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tenant Management</title>
+    <title>Unit Owner Management</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <style>
       .btn-billing {
@@ -21,31 +21,35 @@
     <%- include('../partials/navbar') %>
 
     <div class="container mt-5">
-      <h1 class="mb-4 text-center"><%= tenants[0].bldg_name %> Building %></h1>
+      <% if (owners.length > 0) { %>
+      <h1 class="mb-4 text-center"><%= owners[0].bldg_name %> Bldg</h1>
+      <% } else { %>
+      <h1 class="mb-4 text-center">Owners List</h1>
+      <% } %>
 
       <div class="d-flex justify-content-between mb-3">
         <a href="/" class="btn btn-secondary">Back to Home</a>
-        <a href="/tenants/add" class="btn btn-success">Add New Tenant</a>
+        <a href="/owners/add" class="btn btn-success">Add New Owner</a>
       </div>
 
-      <% if (tenants.length > 0) { %>
+      <% if (owners.length > 0) { %>
       <div class="table-responsive">
         <table class="table table-striped table-hover align-middle">
           <thead class="table-dark">
             <tr>
-              <th scope="col">Tenant Name</th>
+              <th scope="col">Owner Name</th>
               <th scope="col">Unit</th>
               <th scope="col" class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <% tenants.forEach(tenant => { %>
+            <% owners.forEach(owner => { %>
             <tr>
-              <td><%= tenant.first_name %> <%= tenant.last_name %></td>
-              <td>Unit <%= tenant.unit_no %></td>
+              <td><%= owner.first_name %> <%= owner.last_name %></td>
+              <td>Unit <%= owner.unit_no %></td>
               <td class="text-center text-nowrap">
                 <a
-                  href="/tenants/edit/<%= tenant.tenant_id %>"
+                  href="/owners/edit/<%= owner.owner_id %>"
                   class="btn btn-sm btn-primary"
                   >Edit</a
                 >
@@ -57,8 +61,8 @@
       </div>
       <% } else { %>
       <div class="alert alert-info text-center" role="alert">
-        No tenants now.
-        <a href="/tenants/add" class="alert-link">Add one now!</a>
+        No Owners Now.
+        <a href="/owners/add" class="alert-link">Add one now!</a>
       </div>
       <% } %>
     </div>

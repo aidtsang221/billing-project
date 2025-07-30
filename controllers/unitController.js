@@ -23,7 +23,7 @@ export const getAllUnits = async (req, res) => {
 export const showAddForm = async (req, res) => {
   try {
     const bldgs = await getBldgsForDropdown();
-    res.render("units/add", { bldgs: bldgs });
+    res.render("units/add", { bldgs });
   } catch (error) {
     console.error("Error loading add unit form:", error);
     res.status(500).send("Error loading add unit form. Please try again.");
@@ -59,8 +59,47 @@ export const addUnit = async (req, res) => {
   }
 };
 
-// Display Edit Form - To Be Added
-export const showEditForm = async (req, res) => {};
+// Display Edit Form
+export const showEditForm = async (req, res) => {
+  const unitId = req.params.unitId;
 
-// Update Existing Building - To be Added
-export const updateUnit = async (req, res) => {};
+  try {
+    const bldgs = await getBldgsForDropdown();
+    const [units] = await pool.query(
+      `SELECT u.unit_id, b.bldg_name, u.bldg_id, u.unit_no, u.unit_area 
+        FROM unit u
+        JOIN bldg b ON u.bldg_id = b.bldg_id
+        WHERE u.unit_id = ?`,
+      [unitId]
+    );
+
+    const unit = units[0];
+
+    res.render("units/edit", { bldgs, unit });
+  } catch (error) {
+    console.error("Error loading edit unit form:", error);
+    res.status(500).send("Error loading edit unit form. Please try again.");
+  }
+};
+
+// Update Existing Building
+export const updateUnit = async (req, res) => {
+  const unitId = req.params.unitId;
+  const { bldg_id, unit_no, unit_area } = req.body;
+
+  if (!bldg_id || !unit_no || !unit_area) {
+    return res.status(400).send("All fields are required.");
+  }
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE unit SET bldg_id = ?, unit_no = ?, unit_area = ? WHERE unit_id = ?`,
+      [bldg_id, unit_no, unit_area, unitId]
+    );
+
+    res.redirect(`/units`);
+  } catch (error) {
+    console.error("Error updating unit:", error);
+    res.status(500).send("Error updating unit. Please try again.");
+  }
+};

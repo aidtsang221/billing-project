@@ -31,12 +31,14 @@
                 <option value="water">Water</option>
                 <% } %> <% if (rates.electricity) { %>
                 <option value="electricity">Electricity</option>
+                <% } %> <% if (rates.internet) { %>
+                <option value="internet">Internet</option>
                 <% } %>
               </select>
-              <% if (!rates.water && !rates.electricity) { %>
+              <% if (!rates.water && !rates.electricity && !rates.internet) { %>
               <div class="form-text text-danger">
-                No water or electricity rates have been configured for this
-                building in settings.
+                No water or electricity or internet rates have been configured
+                for this building in settings.
               </div>
               <% } %>
             </div>
@@ -62,7 +64,7 @@
             </p>
           </div>
 
-          <div class="row">
+          <div class="row" id="readingFields">
             <div class="col-md-6 mb-3">
               <label for="prev_reading" class="form-label"
                 >Previous Reading:</label
@@ -74,7 +76,6 @@
                 name="prev_reading"
                 placeholder="e.g., 1500"
                 required
-                step="0.01"
               />
             </div>
             <div class="col-md-6 mb-3">
@@ -88,7 +89,6 @@
                 name="curr_reading"
                 placeholder="e.g., 1650"
                 required
-                step="0.01"
               />
               <div class="invalid-feedback">
                 Current reading cannot be less than previous reading.
@@ -106,7 +106,7 @@
                 class="form-control"
                 id="start_date"
                 name="start_date"
-                required
+                disabled
               />
             </div>
             <div class="col-md-4 mb-3">
@@ -118,7 +118,7 @@
                 class="form-control"
                 id="end_date"
                 name="end_date"
-                required
+                disabled
               />
             </div>
             <div class="col-md-4 mb-3">
@@ -128,7 +128,7 @@
                 class="form-control"
                 id="due_date"
                 name="due_date"
-                required
+                disabled
               />
             </div>
           </div>
@@ -153,6 +153,7 @@
         const ratesData = {
           water: <%- JSON.stringify(rates.water || null) %>,
           electricity: <%- JSON.stringify(rates.electricity || null) %>,
+          internet: <%- JSON.stringify(rates.internet || null) %>
         };
 
         const utilityTypeSelect = document.getElementById("utilityType");
@@ -162,9 +163,26 @@
         const currReadingInput = document.getElementById("curr_reading");
         const totalAmountDisplay = document.getElementById("totalAmountDisplay");
         const totalAmountHiddenInput = document.getElementById("total_amt");
+        const readingFields = document.getElementById("readingFields");
+
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const dueDateInput = document.getElementById('due_date');
 
         function calculateAndDisplayTotal() {
           const rate = parseFloat(rateInput.value) || 0;
+          const selectedType = utilityTypeSelect.value;
+
+            if (selectedType === "internet") {
+            const total = rate;
+            totalAmountDisplay.textContent = total.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            totalAmountHiddenInput.value = total.toFixed(2);
+            return;
+          }
+
           const prevReading = parseFloat(prevReadingInput.value) || 0;
           const currReading = parseFloat(currReadingInput.value) || 0;
 
@@ -188,6 +206,32 @@
           totalAmountHiddenInput.value = total.toFixed(2);
         }
 
+        function toggleReadingFields() {
+          const selectedType = utilityTypeSelect.value;
+
+          if (selectedType === "internet") {
+            readingFields.style.display = "none";
+            prevReadingInput.removeAttribute("required");
+            currReadingInput.removeAttribute("required");
+
+            prevReadingInput.value = "";
+            currReadingInput.value = "";
+            currReadingInput.classList.remove("is-invalid");
+          } else {
+            readingFields.style.display = "flex";
+            prevReadingInput.setAttribute("required", "required");
+            currReadingInput.setAttribute("required", "required");
+          }
+        }
+
+        function formatDateForInput(date) {
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        }
+
         utilityTypeSelect.addEventListener("change", function () {
           const selectedType = this.value;
           const selectedRateData = ratesData[selectedType];
@@ -195,10 +239,20 @@
           if (selectedRateData) {
             rateInput.value = selectedRateData.rate;
             utilSettingIdInput.value = selectedRateData.utilSettingId;
+
+            startDateInput.value = formatDateForInput(selectedRateData.start_date);
+            endDateInput.value = formatDateForInput(selectedRateData.end_date);
+            dueDateInput.value = formatDateForInput(selectedRateData.due_date);
           } else {
             rateInput.value = "";
             utilSettingIdInput.value = "";
+
+            startDateInput.value = "";
+            endDateInput.value = "";
+            dueDateInput.value = "";
           }
+
+          toggleReadingFields();
           calculateAndDisplayTotal();
         });
 

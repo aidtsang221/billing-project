@@ -20,6 +20,14 @@
             class="btn btn-primary me-2"
             >Create Utility Bill</a
           >
+          <% if (utilities.length > 0) { %>
+          <a href="/utilityBills/exportWE" class="btn btn-success"
+            >Download Water Electricity Summary</a
+          >
+          <a href="/utilityBills/exportI" class="btn btn-link"
+            >Download Internet Summary</a
+          >
+          <% } %>
         </div>
       </div>
 
@@ -29,10 +37,13 @@
         <table class="table table-striped table-hover">
           <thead class="table-light">
             <tr>
-              <th>Tenant</th>
+              <th>Bill No.</th>
+              <th>Owner</th>
+              <th>AR No</th>
               <th>Unit No</th>
               <th>Category</th>
               <th>Rate</th>
+              <th>Amount Paid</th>
               <th>Previous Reading</th>
               <th>Current Reading</th>
               <th>Total Amount</th>
@@ -45,18 +56,23 @@
           <tbody>
             <% utilities.forEach(bill => { %>
             <tr>
-              <td><%= bill.tenant_name %></td>
+              <td>RC<%= bill.util_id %></td>
+              <td><%= bill.owner_name %></td>
+              <td><%= bill.ack_no %></td>
               <td><%= bill.unit_no %></td>
               <td>
                 <%= bill.category.charAt(0).toUpperCase() +
                 bill.category.slice(1) %>
               </td>
               <td><%= bill.rate %></td>
+              <td><%= bill.amt_paid.toFixed(2) %></td>
               <td><%= bill.prev_reading %></td>
               <td><%= bill.curr_reading %></td>
               <td>
-                <%= bill.total_amt.toLocaleString('en-US', {
-                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                <b
+                  ><%= bill.total_amt.toLocaleString('en-US', {
+                  minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></b
+                >
               </td>
               <td>
                 <%= new Date(bill.start_date).toLocaleDateString() %> - <%= new
@@ -75,6 +91,11 @@
                 </span>
               </td>
               <td class="text-nowrap">
+                <a
+                  href="/utilityBills/payment/<%= bill.util_id %>"
+                  class="btn btn-primary btn-sm me-2"
+                  >Edit Payment</a
+                >
                 <a
                   href="/utilityBills/edit/<%= bill.util_id %>"
                   class="btn btn-primary btn-sm me-2"

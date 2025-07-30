@@ -7,6 +7,8 @@
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
+    <%- include('../partials/navbar') %>
+
     <div class="container mt-5">
       <h1 class="mb-4 text-center">Settings for <%= building.bldg_name %></h1>
 
@@ -24,6 +26,9 @@
             <tr>
               <th>Category</th>
               <th>Rate</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Due Date</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -34,13 +39,10 @@
                 <%= setting.category.replace(/_/g, ' ').replace(/\b\w/g, c =>
                 c.toUpperCase()) %>
               </td>
-              <td>
-                <!-- <% if (setting.category === 'association_dues') { %> <%= new
-                Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP'
-                }).format(setting.value) %> <% } else { %> <%= setting.value %>
-                <% } %> / sqm -->
-                <%= setting.value %>
-              </td>
+              <td><%= setting.value %></td>
+              <td><%= setting.start_date.toLocaleDateString() %></td>
+              <td><%= setting.end_date.toLocaleDateString() %></td>
+              <td><%= setting.due_date.toLocaleDateString() %></td>
               <td class="text-nowrap">
                 <a
                   href="/settings/edit/<%= setting.setting_id %>"

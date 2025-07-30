@@ -3,6 +3,8 @@ import * as assocController from "../controllers/assocController.js";
 
 const router = express.Router({ mergeParams: true });
 
+router.get("/export", assocController.generateAssocDuesExcel);
+
 router.get("/:unitId", assocController.getAllAssocDues);
 
 router.get("/add/:unitId", assocController.showAddForm);

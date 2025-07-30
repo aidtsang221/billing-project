@@ -7,6 +7,8 @@
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
+    <%- include('../partials/navbar') %>
+
     <div class="container mt-5">
       <h1 class="mb-4 text-center">Add New Setting</h1>
 
@@ -35,15 +37,49 @@
           />
         </div>
 
-        <!-- This div will be shown for 'water' or 'electricity' -->
+        <!-- This div will be shown for 'water' or 'electricity' or 'internet' -->
         <div id="rate-group" class="mb-3 d-none">
-          <label for="rate" class="form-label">Consumption Rate</label>
+          <label for="rate" class="form-label" id="rate-label"
+            >Consumption Rate</label
+          >
           <input
             type="number"
             class="form-control"
             id="rate"
             placeholder="e.g., 150"
           />
+        </div>
+
+        <div id="date-fields-group" class="mb-3 d-none">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="start-date" class="form-label">Start Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="start_date"
+                name="start_date"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="end-date" class="form-label">End Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="end_date"
+                name="end_date"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="due-date" class="form-label">Due Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="due_date"
+                name="due_date"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- This is a hidden input that will hold the final value to be submitted -->
@@ -70,6 +106,7 @@
 
       const rateGroup = document.getElementById("rate-group");
       const rateInput = document.getElementById("rate");
+      const rateLabel = document.getElementById("rate-label");
 
       const valueInput = document.getElementById("value-input");
 
@@ -77,30 +114,54 @@
 
       const submitBtn = document.getElementById("submit-btn");
 
+      const dateFieldsGroup = document.getElementById("date-fields-group");
+      const startDateInput = document.getElementById("start_date");
+      const endDateInput = document.getElementById("end_date");
+      const dueDateInput = document.getElementById("due_date");
+
       category.addEventListener("change", () => {
         const selectedCategory = category.value;
 
         amountGroup.classList.add("d-none");
         rateGroup.classList.add("d-none");
+        dateFieldsGroup.classList.add("d-none");
 
         amountInput.required = false;
         rateInput.required = false;
+        startDateInput.required = false;
+        endDateInput.required = false;
+        dueDateInput.required = false;
 
         submitBtn.disabled = true;
 
         if (selectedCategory === "association_dues") {
           amountGroup.classList.remove("d-none");
           amountInput.required = true;
+          amountGroup.after(dateFieldsGroup);
         } else if (
           selectedCategory === "water" ||
-          selectedCategory === "electricity"
+          selectedCategory === "electricity" ||
+          selectedCategory === "internet"
         ) {
           rateGroup.classList.remove("d-none");
           rateInput.required = true;
+          rateGroup.after(dateFieldsGroup);
+
+          if (selectedCategory === "internet") {
+            rateLabel.textContent = "Amount (PHP)";
+            rateInput.placeholder = "e.g., 2500.00";
+          } else {
+            rateLabel.textContent = "Consumption Rate";
+            rateInput.placeholder = "e.g., 150";
+          }
         }
 
         if (selectedCategory) {
           submitBtn.disabled = false;
+          dateFieldsGroup.classList.remove("d-none");
+          startDateInput.required = true;
+          endDateInput.required = true;
+          dueDateInput.required = true;
         }
       });
 

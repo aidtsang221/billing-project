@@ -76,7 +76,7 @@
         <h2>Association Dues Bill</h2>
         <h3><%= assoc.bldg_name %></h3>
         <p>Unit <%= assoc.unit_no %></p>
-        <p>Tenant: <%= assoc.first_name %> <%= assoc.last_name %></p>
+        <p>Owner: <%= assoc.first_name %> <%= assoc.last_name %></p>
       </div>
 
       <div class="bill-details mb-4">
@@ -118,6 +118,13 @@
           <tr>
             <td>Total Amount</td>
             <td>₱ <%= assoc.final_amount %></td>
+          </tr>
+          <tr>
+            <td>Date Paid</td>
+            <td>
+              <%= new Date(assoc.date_paid).toLocaleDateString('en-US', { year:
+              'numeric', month: 'long', day: 'numeric' }) %>
+            </td>
           </tr>
           <tr>
             <td>Amount Paid</td>

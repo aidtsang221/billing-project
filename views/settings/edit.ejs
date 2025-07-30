@@ -7,6 +7,8 @@
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
+    <%- include('../partials/navbar') %>
+
     <div class="container mt-5">
       <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
@@ -42,13 +44,52 @@
 
                 <!-- Rate Field (for utilities) -->
                 <div id="rate-group" class="mb-3 d-none">
-                  <label for="rate" class="form-label">Consumption Rate</label>
+                  <label for="rate" class="form-label" id="rate-label"
+                    >Consumption Rate</label
+                  >
                   <input
                     type="number"
                     class="form-control"
                     id="rate"
                     value="<%= setting.value %>"
                   />
+                </div>
+
+                <div id="date-fields-group" class="mb-3 d-none">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <label for="start-date" class="form-label"
+                        >Start Date</label
+                      >
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="start_date"
+                        name="start_date"
+                        value="<%= formatDateForInput(setting.start_date)%>"
+                      />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="end-date" class="form-label">End Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="end_date"
+                        name="end_date"
+                        value="<%= formatDateForInput(setting.end_date) %>"
+                      />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="due-date" class="form-label">Due Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="due_date"
+                        name="due_date"
+                        value="<%= formatDateForInput(setting.due_date) %>"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <!-- The hidden input to send the final value -->
@@ -76,20 +117,41 @@
       const rateGroup = document.getElementById("rate-group");
       const amountInput = document.getElementById("amount");
       const rateInput = document.getElementById("rate");
+      const rateLabel = document.getElementById("rate-label");
       const valueInput = document.getElementById("value-input");
       const form = document.querySelector("form");
+
+      const dateFieldsGroup = document.getElementById("date-fields-group");
+      const startDateInput = document.getElementById("start_date");
+      const endDateInput = document.getElementById("end_date");
+      const dueDateInput = document.getElementById("due_date");
 
       const currentCategory = "<%= setting.category %>";
 
       if (currentCategory === "association_dues") {
         amountGroup.classList.remove("d-none");
+        dateFieldsGroup.classList.remove("d-none");
         amountInput.required = true;
+        startDateInput.required = true;
+        endDateInput.required = true;
+        dueDateInput.required = true;
       } else if (
         currentCategory === "water" ||
-        currentCategory === "electricity"
+        currentCategory === "electricity" ||
+        currentCategory === "internet"
       ) {
         rateGroup.classList.remove("d-none");
+        dateFieldsGroup.classList.remove("d-none");
         rateInput.required = true;
+        startDateInput.required = true;
+        endDateInput.required = true;
+        dueDateInput.required = true;
+
+        if (currentCategory === "internet") {
+          rateLabel.textContent = "Amount (PHP)";
+        } else {
+          rateLabel.textContent = "Consumption Rate";
+        }
       }
 
       form.addEventListener("submit", () => {

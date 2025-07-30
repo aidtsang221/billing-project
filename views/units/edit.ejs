@@ -3,22 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add New Unit</title>
+    <title>Edit Unit</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
     <%- include('../partials/navbar') %>
 
     <div class="container mt-5">
-      <h1 class="mb-4 text-center">Add New Unit</h1>
+      <h1 class="mb-4 text-center">Edit Unit</h1>
 
-      <form action="/units" method="POST">
+      <form action="/units/edit/<%= unit.unit_id %>" method="POST">
         <div class="mb-3">
           <label for="bldg_id" class="form-label">Building:</label>
           <select class="form-select" id="bldg_id" name="bldg_id" required>
             <option value="">-- Select a Building --</option>
             <% bldgs.forEach(bldg => { %>
-            <option value="<%= bldg.bldg_id %>"><%= bldg.bldg_name %></option>
+            <option value="<%= bldg.bldg_id %>" <%= bldg.bldg_id === unit.bldg_id ? 'selected' : '' %>><%= bldg.bldg_name %></option>
             <% }); %>
           </select>
         </div>
@@ -32,8 +32,8 @@
             name="unit_no"
             placeholder="e.g., 101"
             required
-            step="any"
             min="1"
+            value="<%= unit.unit_no %>"
           />
         </div>
 
@@ -45,13 +45,14 @@
             id="unit_area"
             name="unit_area"
             placeholder="e.g., 800"
-            step="any"
             required
+            step="any"
             min="1"
+            value="<%= unit.unit_area %>"
           />
         </div>
 
-        <button type="submit" class="btn btn-success">Add Unit</button>
+        <button type="submit" class="btn btn-success">Edit Unit</button>
         <a href="/units" class="btn btn-secondary ms-2">Cancel</a>
       </form>
 

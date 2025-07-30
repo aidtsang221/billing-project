@@ -21,6 +21,8 @@
             name="unit_id"
             value="<%= assocDues.unit_id %>"
           />
+          <input type="hidden" id="total_amt" name="total_amt" />
+
           <div class="mb-3">
             <label for="amount" class="form-label"
               >Association Dues Amount:</label
@@ -39,6 +41,14 @@
           <!-- Total Display Area -->
           <div class="alert alert-info" role="alert">
             <h4 class="alert-heading">Total Amount Due</h4>
+            <p class="mb-1 text-muted">
+              Unit Area:
+              <span class="fw-semibold"><%= assocDues.unit_area %> sqm</span>
+              <div class="col-sm-6 text-muted">
+              Base Amount: ₱<span id="baseAmountDisplay" class="fw-semibold">0.00</span>
+              </div>
+            </p>
+            
             <p class="mb-0 fs-3 fw-bold">
               ₱ <span id="totalAmountDisplay">0.00</span>
             </p>
@@ -65,7 +75,7 @@
                 id="start_date"
                 name="start_date"
                 value="<%= assocDues.start_date %>"
-                required
+                disabled
               />
             </div>
             <div class="col-md-4 mb-3">
@@ -78,7 +88,7 @@
                 id="end_date"
                 name="end_date"
                 value="<%= assocDues.end_date %>"
-                required
+                disabled
               />
             </div>
             <div class="col-md-4 mb-3">
@@ -89,7 +99,7 @@
                 id="due_date"
                 name="due_date"
                 value="<%= assocDues.due_date %>"
-                required
+                disabled
               />
             </div>
           </div>
@@ -112,13 +122,23 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const duesRateInput = document.getElementById("duesRate");
+        const adjustmentInput = document.getElementById("adjustment");
         const totalAmountDisplay = document.getElementById("totalAmountDisplay");
+        const baseAmountDisplay = document.getElementById("baseAmountDisplay");
+        const totalAmountHiddenInput = document.getElementById("total_amt");
 
         const unitArea = <%= assocDues.unit_area %>;
 
         function calculateAndDisplayTotal() {
           const rate = parseFloat(duesRateInput.value) || 0;
-          const total = rate * unitArea;
+          const baseAmount = rate * unitArea;
+          const adjustment = parseFloat(adjustmentInput.value) || 0;
+          const total = baseAmount + adjustment;
+
+          baseAmountDisplay.textContent = baseAmount.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
 
           totalAmountDisplay.textContent = total.toLocaleString("en-US", {
             minimumFractionDigits: 2,
@@ -129,6 +149,7 @@
         }
 
         duesRateInput.addEventListener("input", calculateAndDisplayTotal);
+        adjustmentInput.addEventListener("input", calculateAndDisplayTotal);
 
         calculateAndDisplayTotal();
       });

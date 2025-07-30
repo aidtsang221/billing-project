@@ -20,6 +20,11 @@
             class="btn btn-primary me-2"
             >Create Association Dues</a
           >
+          <% if (assocDues.length > 0) { %>
+          <a href="/assocBills/export" class="btn btn-success"
+            >Download Report</a
+          >
+          <% } %>
         </div>
       </div>
 
@@ -29,7 +34,8 @@
         <table class="table table-striped table-hover">
           <thead class="table-light">
             <tr>
-              <th>Tenant</th>
+              <th>Bill No.</th>
+              <th>Owner</th>
               <th>Unit No.</th>
               <th>AR No.</th>
               <th>Adjustment Fee</th>
@@ -42,15 +48,20 @@
             </tr>
           </thead>
           <tbody>
-            <% assocDues.forEach(bill => { %> <% const balance =
-            bill.final_amount - bill.amt_paid %>
+            <% assocDues.forEach(bill => { %>
             <tr>
-              <td><%= bill.tenant_name %></td>
+              <td>M<%= bill.assoc_id %></td>
+              <td><%= bill.owner_name %></td>
               <td><%= bill.unit_no %></td>
               <td><%= bill.ack_no %></td>
               <td><%= bill.adjustment.toFixed(2) %></td>
               <td><%= bill.amt_paid.toFixed(2) %></td>
-              <td><strong><%= balance.toFixed(2) %></strong></td>
+              <td>
+                <strong>
+                  <% if (bill.total_amt > 0) { %> <%= bill.total_amt.toFixed(2)
+                  %> <% } else { %> 0.00 <% } %>
+                </strong>
+              </td>
               <td>
                 <%= new Date(bill.start_date).toLocaleDateString() %> - <%= new
                 Date(bill.end_date).toLocaleDateString() %>
@@ -106,6 +117,10 @@
       <% } else { %>
       <div class="alert alert-info text-center" role="alert">
         No Association Dues records found.
+        <br />
+        <strong>
+          Note: If you can't see the added record yet, kindly add an owner.
+        </strong>
       </div>
       <% } %>
     </div>

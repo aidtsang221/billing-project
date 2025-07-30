@@ -47,6 +47,12 @@
                     </option>
                     <% } %>
 
+                    <% if (rates.internet) { %>
+                    <option value="internet" <%= utilityBill.category === 'internet' ? 'selected' : '' %>>
+                        Internet
+                    </option>
+                    <% } %>
+
                 </select>
             </div>
 
@@ -75,7 +81,7 @@
             </p>
           </div>
 
-          <div class="row">
+          <div class="row" id="readingFields">
             <div class="col-md-6 mb-3">
               <label for="prev_reading" class="form-label"
                 >Previous Reading:</label
@@ -120,7 +126,7 @@
                 id="start_date"
                 name="start_date"
                 value="<%= utilityBill.start_date %>"
-                required
+                disabled
               />
             </div>
             <div class="col-md-4 mb-3">
@@ -133,7 +139,7 @@
                 id="end_date"
                 name="end_date"
                 value="<%= utilityBill.end_date %>"
-                required
+                disabled
               />
             </div>
             <div class="col-md-4 mb-3">
@@ -144,7 +150,7 @@
                 id="due_date"
                 name="due_date"
                 value="<%= utilityBill.due_date %>"
-                required
+                disabled
               />
             </div>
           </div>
@@ -169,6 +175,7 @@
         const ratesData = {
           water: <%- JSON.stringify(rates.water || null) %>,
           electricity: <%- JSON.stringify(rates.electricity || null) %>,
+          internet: <%- JSON.stringify(rates.internet || null) %>
         };
 
         const utilityTypeSelect = document.getElementById("utilityType");
@@ -178,9 +185,26 @@
         const currReadingInput = document.getElementById("curr_reading");
         const totalAmountDisplay = document.getElementById("totalAmountDisplay");
         const totalAmountHiddenInput = document.getElementById("total_amt");
+        const readingFields = document.getElementById("readingFields");
+
+        const startDateInput = document.getElementById("start_date");
+        const endDateInput = document.getElementById("end_date");
+        const dueDateInput = document.getElementById("due_date");
 
         function calculateAndDisplayTotal() {
           const rate = parseFloat(rateInput.value) || 0;
+          const selectedType = utilityTypeSelect.value;
+
+            if (selectedType === "internet") {
+            const total = rate;
+            totalAmountDisplay.textContent = total.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            totalAmountHiddenInput.value = total.toFixed(2);
+            return;
+          }
+
           const prevReading = parseFloat(prevReadingInput.value) || 0;
           const currReading = parseFloat(currReadingInput.value) || 0;
 
@@ -204,6 +228,32 @@
           totalAmountHiddenInput.value = total.toFixed(2);
         }
 
+        function toggleReadingFields() {
+          const selectedType = utilityTypeSelect.value;
+
+          if (selectedType === "internet") {
+            readingFields.style.display = "none";
+            prevReadingInput.removeAttribute("required");
+            currReadingInput.removeAttribute("required");
+
+            prevReadingInput.value = "";
+            currReadingInput.value = "";
+            currReadingInput.classList.remove("is-invalid");
+          } else {
+            readingFields.style.display = "flex";
+            prevReadingInput.setAttribute("required", "required");
+            currReadingInput.setAttribute("required", "required");
+          }
+        }
+
+        function formatDateForInput(date) {
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        }
+
         utilityTypeSelect.addEventListener("change", function () {
           const selectedType = this.value;
           const selectedRateData = ratesData[selectedType];
@@ -211,10 +261,20 @@
           if (selectedRateData) {
             rateInput.value = selectedRateData.rate;
             utilSettingIdInput.value = selectedRateData.utilSettingId;
+
+            startDateInput.value = formatDateForInput(selectedRateData.start_date);
+            endDateInput.value = formatDateForInput(selectedRateData.end_date);
+            dueDateInput.value = formatDateForInput(selectedRateData.due_date);
           } else {
             rateInput.value = "";
             utilSettingIdInput.value = "";
+
+            startDateInput.value = "";
+            endDateInput.value = "";
+            dueDateInput.value = "";
           }
+
+          toggleReadingFields();
           calculateAndDisplayTotal();
         });
 

@@ -1,23 +1,23 @@
 import pool from "../db.js";
 
-// Read All Tenants
-export const getAllTenants = async (req, res) => {
+// Read All Owners
+export const getAllOwners = async (req, res) => {
   try {
-    const [tenants] = await pool.query(
-      `SELECT t.tenant_id, t.first_name, t.last_name, 
-        u.unit_no, b.bldg_name FROM tenant t
-        JOIN unit u ON t.unit_id = u.unit_id
+    const [owners] = await pool.query(
+      `SELECT o.owner_id, o.first_name, o.last_name, 
+        u.unit_no, b.bldg_name FROM owner o
+        JOIN unit u ON o.unit_id = u.unit_id
         JOIN bldg b ON u.bldg_id = b.bldg_id`
     );
-    res.render("tenants/index", { tenants: tenants });
+    res.render("owners/index", { owners: owners });
   } catch (error) {
-    console.error("Error fetching tenants for unit:", error);
-    res.status(500).send("Error fetching tenants. Please check server logs.");
+    console.error("Error fetching owners for unit:", error);
+    res.status(500).send("Error fetching owners. Please check server logs.");
   }
 };
 
-// Display Add Tenant Form
-export const showAddTenantForm = async (req, res) => {
+// Display Add Owner Form
+export const showAddOwnerForm = async (req, res) => {
   try {
     const [buildingsAndUnits] = await pool.query(`
       SELECT 
@@ -46,15 +46,15 @@ export const showAddTenantForm = async (req, res) => {
     });
     const buildings = Array.from(buildingsMap.values());
 
-    res.render("tenants/add", { buildings: buildings });
+    res.render("owners/add", { buildings: buildings });
   } catch (error) {
-    console.error("Error loading add tenant form:", error);
-    res.status(500).send("Error loading add tenant form. Please try again.");
+    console.error("Error loading add owner form:", error);
+    res.status(500).send("Error loading add owner form. Please try again.");
   }
 };
 
-//Create New Tenant
-export const addTenant = async (req, res) => {
+//Create New Owner
+export const addOwner = async (req, res) => {
   const { first_name, last_name, unit_id } = req.body;
 
   if (
@@ -69,31 +69,31 @@ export const addTenant = async (req, res) => {
 
   try {
     await pool.query(
-      "INSERT INTO tenant (unit_id, first_name, last_name) VALUES (?, ?, ?)",
+      "INSERT INTO owner (unit_id, first_name, last_name) VALUES (?, ?, ?)",
       [unit_id, first_name.trim(), last_name.trim()]
     );
-    res.redirect(`/tenants`);
+    res.redirect(`/owners`);
   } catch (error) {
-    console.error("Error adding tenant:", error);
-    res.status(500).send("Error adding tenant. Please try again.");
+    console.error("Error adding owner:", error);
+    res.status(500).send("Error adding owner. Please try again.");
   }
 };
 
-// Display Edit Tenant Form
-export const showEditTenantForm = async (req, res) => {
-  const tenantId = req.params.id;
+// Display Edit Owner Form
+export const showEditOwnerForm = async (req, res) => {
+  const ownerId = req.params.id;
 
   try {
-    const [[tenant]] = await pool.query(
-      `SELECT t.*, u.unit_no, u.bldg_id, b.bldg_name 
-       FROM tenant t
-       JOIN unit u ON t.unit_id = u.unit_id
+    const [[owner]] = await pool.query(
+      `SELECT o.*, u.unit_no, u.bldg_id, b.bldg_name 
+       FROM owner o
+       JOIN unit u ON o.unit_id = u.unit_id
        JOIN bldg b ON u.bldg_id = b.bldg_id
-       WHERE t.tenant_id = ?`,
-      [tenantId]
+       WHERE o.owner_id = ?`,
+      [ownerId]
     );
-    if (tenant.length === 0) {
-      return res.status(404).send("Tenant not found.");
+    if (owner.length === 0) {
+      return res.status(404).send("Owner not found.");
     }
 
     const [buildingsAndUnits] = await pool.query(`
@@ -123,19 +123,19 @@ export const showEditTenantForm = async (req, res) => {
     });
     const buildings = Array.from(buildingsMap.values());
 
-    res.render("tenants/edit", {
-      tenant,
+    res.render("owners/edit", {
+      owner,
       buildings,
     });
   } catch (error) {
-    console.error("Error fetching tenant:", error);
-    res.status(500).send("Error loading tenant. Please try again.");
+    console.error("Error fetching owner:", error);
+    res.status(500).send("Error loading owner. Please try again.");
   }
 };
 
-// Update Existing Tenant
-export const updateTenant = async (req, res) => {
-  const tenantId = req.params.id;
+// Update Existing Owner
+export const updateOwner = async (req, res) => {
+  const ownerId = req.params.id;
   const { unit_id, first_name, last_name } = req.body;
 
   // Basic validation
@@ -151,15 +151,15 @@ export const updateTenant = async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      "UPDATE tenant SET unit_id = ?, first_name = ?, last_name = ? WHERE tenant_id = ?",
-      [unit_id, first_name.trim(), last_name.trim(), tenantId]
+      "UPDATE owner SET unit_id = ?, first_name = ?, last_name = ? WHERE owner_id = ?",
+      [unit_id, first_name.trim(), last_name.trim(), ownerId]
     );
     if (result.affectedRows === 0) {
-      return res.status(404).send("Tenant not found or no changes made.");
+      return res.status(404).send("Owner not found or no changes made.");
     }
-    res.redirect("/tenants");
+    res.redirect("/owners");
   } catch (error) {
-    console.error("Error updating tenant:", error);
-    res.status(500).send("Error updating tenant. Please try again.");
+    console.error("Error updating owner:", error);
+    res.status(500).send("Error updating owner. Please try again.");
   }
 };
