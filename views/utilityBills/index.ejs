@@ -12,38 +12,70 @@
     <div class="container mt-5">
       <h1 class="mb-4 text-center">List of Utility Bills</h1>
 
-      <div class="d-flex justify-content-between mb-3">
-        <a href="/" class="btn btn-secondary">Back to Home</a>
-        <div>
-          <a
-            href="/utilityBills/add/<%= unitInfo.unit_id %>"
-            class="btn btn-primary me-2"
-            >Create Utility Bill</a
-          >
-          <% if (utilities.length > 0) { %>
-          <a href="/utilityBills/exportWE" class="btn btn-success"
-            >Download Water Electricity Summary</a
-          >
-          <a href="/utilityBills/exportI" class="btn btn-link"
-            >Download Internet Summary</a
-          >
+      <% let hasUtilities = (utilities && utilities.length > 0); %>
+
+      <div class="row mb-3">
+      <!-- Back button -->
+      <div class="col-12 col-md-3 mb-2 mb-md-0">
+        <button class="btn btn-secondary w-100" onclick="history.back()">Back</button>
+      </div>
+
+      <!-- Filters -->
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <form method="get" action="">
+            <select class="form-select" name="category" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              <option value="water" <%= (req.query.category === 'water') ? 'selected' : '' %>>Water</option>
+              <option value="electricity" <%= (req.query.category === 'electricity') ? 'selected' : '' %>>Electricity</option>
+              <option value="internet" <%= (req.query.category === 'internet') ? 'selected' : '' %>>Internet</option>
+              <option value="we" <%= (req.query.category === 'we') ? 'selected' : '' %>>Water + Electricity</option>
+            </select>
+          </form>
+        </div>
+      
+      <div class="col-12 col-md-6">
+        <div class="d-flex flex-wrap justify-content-md-end">
+          <a href="/utilityBills/add/<%= unitInfo.unit_id %>" class="btn btn-primary mb-2 me-2">
+            Create Utility Bill
+          </a>
+
+          <% if (hasUtilities) { %>
+            <a href="/utilityBills/exportWE" class="btn btn-success mb-2 me-2">
+              Download W+E
+            </a>
+            <a href="/utilityBills/exportI" class="btn btn-success mb-2">
+              Download Net
+            </a>
           <% } %>
         </div>
       </div>
+    <!-- Separate row for Generate PDF -->
+     <% if (hasUtilities) { %>
+      <div class="row mb-3">
+        <div class="col-12">
+          <form id="pdfForm" method="POST" action="/utilityBills/exportSelected" target="_blank">
+            <input type="hidden" name="billIds" id="billIds" />
+            <button type="submit" class="btn btn-success w-100 w-md-auto">Generate Selected PDF</button>
+          </form>
+        </div>
+      </div>
+    <% } %>
+
 
       <!-- Utility Bills Section -->
-      <% if (utilities.length > 0) { %>
+      <% if (hasUtilities) { %>
       <div class="table-responsive">
         <table class="table table-striped table-hover">
           <thead class="table-light">
             <tr>
+              <th>
+                <input type="checkbox" id="selectAll" />
+              </th>
               <th>Bill No.</th>
               <th>Owner</th>
-              <th>AR No</th>
               <th>Unit No</th>
               <th>Category</th>
               <th>Rate</th>
-              <th>Amount Paid</th>
               <th>Previous Reading</th>
               <th>Current Reading</th>
               <th>Total Amount</th>
@@ -56,16 +88,17 @@
           <tbody>
             <% utilities.forEach(bill => { %>
             <tr>
+              <td>
+                <input type="checkbox" name="selectedBills" value="<%= bill.util_id %>" class="billCheckbox" />
+              </td>
               <td>RC<%= bill.util_id %></td>
               <td><%= bill.owner_name %></td>
-              <td><%= bill.ack_no %></td>
               <td><%= bill.unit_no %></td>
               <td>
                 <%= bill.category.charAt(0).toUpperCase() +
                 bill.category.slice(1) %>
               </td>
               <td><%= bill.rate %></td>
-              <td><%= bill.amt_paid.toFixed(2) %></td>
               <td><%= bill.prev_reading %></td>
               <td><%= bill.curr_reading %></td>
               <td>
@@ -92,20 +125,14 @@
               </td>
               <td class="text-nowrap">
                 <a
-                  href="/utilityBills/payment/<%= bill.util_id %>"
+                  href="/utilityBills/paymentList/<%= bill.util_id %>"
                   class="btn btn-primary btn-sm me-2"
-                  >Edit Payment</a
+                  >Payments</a
                 >
                 <a
                   href="/utilityBills/edit/<%= bill.util_id %>"
                   class="btn btn-primary btn-sm me-2"
                   >Edit</a
-                >
-                <a
-                  href="/utilityBills/<%= bill.util_id %>/pdf"
-                  class="btn btn-info btn-sm ms-2"
-                  target="_blank"
-                  >Generate PDF</a
                 >
                 <!-- <form
                   action="/billing/utility/delete/<%= bill.util_id %>"
@@ -129,10 +156,40 @@
       <% } else { %>
       <div class="alert alert-info text-center" role="alert">
         No utility bill records found.
+        <br />
+        <strong>
+          Note: If you can't see the added record yet, kindly add an owner.
+        </strong>
       </div>
       <% } %>
     </div>
 
     <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const selectAll = document.getElementById("selectAll");
+      const checkboxes = document.querySelectorAll(".billCheckbox");
+      const pdfForm = document.getElementById("pdfForm");
+      const billIdsInput = document.getElementById("billIds");
+
+      // Select/Deselect all
+      selectAll.addEventListener("change", () => {
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      });
+
+      // On form submit, gather selected IDs
+      pdfForm.addEventListener("submit", (e) => {
+        const selected = [...checkboxes]
+          .filter(cb => cb.checked)
+          .map(cb => cb.value);
+
+        if (selected.length === 0) {
+          e.preventDefault();
+          alert("Please select at least one bill to generate PDF.");
+          return;
+        }
+
+        billIdsInput.value = JSON.stringify(selected); // send as JSON string
+      });
+    </script>
   </body>
 </html>

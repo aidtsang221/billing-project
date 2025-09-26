@@ -9,7 +9,7 @@
       body {
         font-family: Arial, sans-serif;
         margin: 0;
-        padding: 1in;
+        padding: 0.5in 1in;
         font-size: 10pt;
         color: #333;
       }
@@ -68,15 +68,40 @@
       .text-muted {
         color: #6c757d !important;
       }
+      .banner {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .banner .logo {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+      }
     </style>
   </head>
   <body>
+    <div class="banner">
+      <img
+        src="http://localhost:3000/images/logo.jpg"
+        alt="Royal Peak Logo"
+        class="logo"
+      />
+    </div>
+
     <div class="container">
       <div class="header">
         <h2>Association Dues Bill</h2>
-        <h3><%= assoc.bldg_name %></h3>
-        <p>Unit <%= assoc.unit_no %></p>
-        <p>Owner: <%= assoc.first_name %> <%= assoc.last_name %></p>
+        <!-- <h3><%= assoc.bldg_name %></h3> -->
+        <p>ASSOC<%= assoc.assoc_id %></p>
+        <p><strong>Unit <%= assoc.unit_no %></strong></p>
+        <p><strong>Unit Area</strong>: <%= assoc.unit_area %> sqm</p>
+        <p>
+          <strong>Owner</strong>: <%= assoc.first_name %> <%= assoc.last_name %>
+        </p>
+        <p><strong>Rate</strong>: ₱ <%= assoc.amount %> / sqm</p>
       </div>
 
       <div class="bill-details mb-4">
@@ -92,10 +117,6 @@
           Date(assoc.due_date).toLocaleDateString('en-US', { year: 'numeric',
           month: 'long', day: 'numeric' }) %>
         </p>
-        <p>
-          <strong>Status:</strong> <%= assoc.status.charAt(0).toUpperCase() +
-          assoc.status.slice(1) %>
-        </p>
       </div>
 
       <h4 class="mt-4 mb-3">Charges Breakdown</h4>
@@ -108,27 +129,19 @@
         </thead>
         <tbody>
           <tr>
-            <td>Association Dues Rate</td>
-            <td><%= assoc.amount %></td>
-          </tr>
-          <tr>
-            <td>Adjustment Fee</td>
-            <td>₱ <%= assoc.adjustment %></td>
-          </tr>
-          <tr>
-            <td>Total Amount</td>
-            <td>₱ <%= assoc.final_amount %></td>
-          </tr>
-          <tr>
-            <td>Date Paid</td>
+            <td>Association Dues</td>
             <td>
-              <%= new Date(assoc.date_paid).toLocaleDateString('en-US', { year:
-              'numeric', month: 'long', day: 'numeric' }) %>
+              ₱ <%= parseFloat(assoc.amount *
+              assoc.unit_area).toLocaleString('en-US', { minimumFractionDigits:
+              2, maximumFractionDigits: 2 }) %>
             </td>
           </tr>
           <tr>
-            <td>Amount Paid</td>
-            <td>₱ <%= assoc.amt_paid %></td>
+            <td>Adjustment Fee</td>
+            <td>
+              ₱ <%= parseFloat(assoc.adjustment).toLocaleString('en-US', {
+              minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -136,7 +149,8 @@
       <div class="total-amount mt-4">
         Total Amount Due:
         <span style="font-size: 1.5em"
-          >₱<%= assoc.remaining_balance.toFixed(2) %></span
+          >₱<%= parseFloat(assoc.total_amt).toLocaleString('en-US', {
+          minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span
         >
       </div>
 

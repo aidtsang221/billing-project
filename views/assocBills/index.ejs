@@ -13,7 +13,7 @@
       <h1 class="mb-4 text-center">List of Association Dues</h1>
 
       <div class="d-flex justify-content-between mb-3">
-        <a href="/" class="btn btn-secondary">Back to Home</a>
+        <button class="btn btn-secondary" onclick="history.back()">Back</button>
         <div>
           <a
             href="/assocBills/add/<%= unitInfo.unit_id %>"
@@ -21,7 +21,9 @@
             >Create Association Dues</a
           >
           <% if (assocDues.length > 0) { %>
-          <a href="/assocBills/export" class="btn btn-success"
+          <a
+            href="/assocBills/export/<%= assocDues[0].bldg_id %>"
+            class="btn btn-success"
             >Download Report</a
           >
           <% } %>
@@ -37,9 +39,8 @@
               <th>Bill No.</th>
               <th>Owner</th>
               <th>Unit No.</th>
-              <th>AR No.</th>
+              <th>Rate</th>
               <th>Adjustment Fee</th>
-              <th>Amount Paid</th>
               <th>Total Amount Due</th>
               <th>Period</th>
               <th>Due Date</th>
@@ -53,13 +54,16 @@
               <td>M<%= bill.assoc_id %></td>
               <td><%= bill.owner_name %></td>
               <td><%= bill.unit_no %></td>
-              <td><%= bill.ack_no %></td>
-              <td><%= bill.adjustment.toFixed(2) %></td>
-              <td><%= bill.amt_paid.toFixed(2) %></td>
+              <td><%= bill.amount %></td>
+              <td>
+                <%= bill.adjustment.toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+              </td>
               <td>
                 <strong>
-                  <% if (bill.total_amt > 0) { %> <%= bill.total_amt.toFixed(2)
-                  %> <% } else { %> 0.00 <% } %>
+                  <%= bill.total_amt ? bill.total_amt.toLocaleString('en-US', {
+                  minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'
+                  %>
                 </strong>
               </td>
               <td>
@@ -80,9 +84,9 @@
               </td>
               <td class="text-nowrap">
                 <a
-                  href="/assocBills/payment/<%= bill.assoc_id %>"
+                  href="/assocBills/paymentList/<%= bill.assoc_id %>"
                   class="btn btn-primary btn-sm me-2"
-                  >Edit Payment</a
+                  >Payments</a
                 >
                 <a
                   href="/assocBills/edit/<%= bill.assoc_id %>"
@@ -96,14 +100,14 @@
                   >Generate PDF</a
                 >
                 <!-- <form
-                  action="/utility/delete/<%= bill.util_id %>"
+                  action="/assocBills/delete/<%= bill.assoc_id %>"
                   method="POST"
                   class="d-inline"
                 >
                   <button
                     type="submit"
                     class="btn btn-danger btn-sm"
-                    onclick="return confirm('Are you sure you want to delete this utility bill record?');"
+                    onclick="return confirm('Are you sure you want to delete this association dues record?');"
                   >
                     Delete
                   </button>

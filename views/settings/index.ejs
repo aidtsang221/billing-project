@@ -13,7 +13,7 @@
       <h1 class="mb-4 text-center">Settings for <%= building.bldg_name %></h1>
 
       <div class="d-flex justify-content-between mb-3">
-        <a href="/" class="btn btn-secondary">Back to Home</a>
+        <button class="btn btn-secondary" onclick="history.back()">Back</button>
         <a href="/settings/add/<%= building.bldg_id %>" class="btn btn-success"
           >Add New Settings</a
         >

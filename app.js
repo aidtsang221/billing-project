@@ -47,6 +47,7 @@ app.use("/units", unitRoutes);
 app.use("/settings", settingRoutes);
 app.use("/owners", ownerRoutes);
 app.use("/utilityBills", utilRoutes);
+app.use("/internet", utilRoutes);
 app.use("/assocBills", assocRoutes);
 
 const port = process.env.PORT || 3000;

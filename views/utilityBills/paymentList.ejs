@@ -3,45 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Building CRUD</title>
+    <title>Payment List</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
     <%- include('../partials/navbar') %>
 
     <div class="container mt-5">
-      <h1 class="mb-4 text-center">Building List</h1>
+      <h1 class="mb-4 text-center">
+        Payment History for Unit <%= unit[0].unit_no %>
+      </h1>
 
       <div class="d-flex justify-content-between mb-3">
         <button class="btn btn-secondary" onclick="history.back()">Back</button>
-        <a href="/bldgs/add" class="btn btn-success">Add New Building</a>
+        <div>
+          <a
+            href="/utilityBills/createPayment/<%= unit[0].util_id %>"
+            class="btn btn-primary me-2"
+            >Create Payment</a
+          >
+        </div>
       </div>
 
-      <% if (bldgs.length > 0) { %>
+      <!-- Utility Payment History Section -->
+      <% if (util.length > 0) { %>
       <div class="table-responsive">
         <table class="table table-striped table-hover">
-          <thead class="table-dark">
+          <thead class="table-light">
             <tr>
-              <th>Building Name</th>
-              <th>Actions</th>
+              <th>Ack No.</th>
+              <th>Amount Paid</th>
+              <th>Date Paid</th>
             </tr>
           </thead>
           <tbody>
-            <% bldgs.forEach(bldg => { %>
+            <% util.forEach(bill => { %>
             <tr>
-              <td><%= bldg.bldg_name %></td>
-              <td class="text-nowrap">
-                <a
-                  href="/bldgs/edit/<%= bldg.bldg_id %>"
-                  class="btn btn-primary btn-sm me-2"
-                  >Edit</a
-                >
-                <a
-                  href="/settings/<%= bldg.bldg_id %>"
-                  class="btn btn-info btn-sm me-2"
-                  >Settings</a
-                >
-              </td>
+              <td><%= bill.ack_no %></td>
+              <td><%= bill.amt_paid.toFixed(2) %></td>
+              <td><%= new Date(bill.date_paid).toLocaleDateString() %></td>
             </tr>
             <% }); %>
           </tbody>
@@ -49,8 +49,7 @@
       </div>
       <% } else { %>
       <div class="alert alert-info text-center" role="alert">
-        No buildings found.
-        <a href="/bldgs/add" class="alert-link">Add one now!</a>
+        No Payment History records found.
       </div>
       <% } %>
     </div>

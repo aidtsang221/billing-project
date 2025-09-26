@@ -3,7 +3,7 @@ import * as assocController from "../controllers/assocController.js";
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/export", assocController.generateAssocDuesExcel);
+router.get("/export/:bldgId", assocController.generateAssocDuesExcel);
 
 router.get("/:unitId", assocController.getAllAssocDues);
 
@@ -17,8 +17,12 @@ router.post("/edit/:id", assocController.updateAssocDues);
 
 router.get("/:assocId/pdf", assocController.generateAssocDuesPdf);
 
-router.get("/payment/:id", assocController.showEditPaymentForm);
+router.get("/paymentList/:id", assocController.showPaymentList);
 
-router.post("/payment/:id", assocController.updatePayment);
+router.get("/createPayment/:id", assocController.showCreatePayment);
+
+router.post("/createPayment/:id", assocController.insertPayment);
+
+router.post("/delete/:id", assocController.deleteAssocDues);
 
 export default router;

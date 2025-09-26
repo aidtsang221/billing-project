@@ -9,18 +9,20 @@ router.get("/exportI", utilController.generateInternetExcel);
 
 router.get("/:unitId", utilController.getAllUtils);
 
+router.post("/exportSelected", utilController.generateUtilityPdf);
+
 router.get("/add/:unitId", utilController.showAddForm);
 
 router.post("/:unitId", utilController.addUtilityBill);
-
-router.get("/:utilId/pdf", utilController.generateUtilityPdf);
 
 router.get("/edit/:id", utilController.showEditUtilityForm);
 
 router.post("/edit/:id", utilController.updateUtilityBill);
 
-router.get("/payment/:id", utilController.showEditPaymentForm);
+router.get("/paymentList/:id", utilController.showPaymentList);
 
-router.post("/payment/:id", utilController.updatePayment);
+router.get("/createPayment/:id", utilController.showCreatePayment);
+
+router.post("/createPayment/:id", utilController.insertPayment);
 
 export default router;

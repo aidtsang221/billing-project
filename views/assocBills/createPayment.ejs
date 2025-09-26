@@ -95,7 +95,7 @@
             </div>
             <div class="card-body">
               <form
-                action="/assocBills/payment/<%= assocDues.assoc_id %>"
+                action="/assocBills/createPayment/<%= assocDues.assoc_id %>"
                 method="POST"
                 id="paymentForm"
               >
@@ -113,6 +113,8 @@
                           id="payment_amount"
                           name="payment_amount"
                           min="1.00"
+                          step="any"
+                          max="<%= assocDues.remaining_balance %>"
                           required
                         />
                       </div>
@@ -196,10 +198,21 @@
       // Form validation
       paymentForm.addEventListener("submit", function (e) {
         const paymentAmount = document.getElementById("payment_amount").value;
+        const maxAmount = paymentAmount.max;
 
         if (paymentAmount <= 0) {
           e.preventDefault();
           alert("Payment amount must be greater than zero");
+          return false;
+        }
+
+        if (paymentAmount > maxAmount) {
+          e.preventDefault();
+          alert(
+            `Payment amount exceeds remaining balance of ₱${maxAmount.toFixed(
+              2
+            )}.`
+          );
           return false;
         }
 

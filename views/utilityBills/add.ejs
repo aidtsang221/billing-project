@@ -75,6 +75,7 @@
                 id="prev_reading"
                 name="prev_reading"
                 placeholder="e.g., 1500"
+                step="any"
                 required
               />
             </div>
@@ -88,6 +89,7 @@
                 id="curr_reading"
                 name="curr_reading"
                 placeholder="e.g., 1650"
+                step="any"
                 required
               />
               <div class="invalid-feedback">
@@ -173,7 +175,7 @@
           const rate = parseFloat(rateInput.value) || 0;
           const selectedType = utilityTypeSelect.value;
 
-            if (selectedType === "internet") {
+          if (selectedType === "internet") {
             const total = rate;
             totalAmountDisplay.textContent = total.toLocaleString("en-US", {
               minimumFractionDigits: 2,

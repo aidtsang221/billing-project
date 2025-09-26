@@ -11,18 +11,14 @@ export const getAllAssocDues = async (req, res) => {
       SELECT
         ad.*,
         CONCAT(o.first_name, ' ', o.last_name) AS owner_name,
+        b.bldg_id,
         b.bldg_name,
         u.unit_no,
-        ads.amount,
-        ads.start_date,
-        ads.end_date,
-        ads.due_date,
         u.unit_area
       FROM association_dues ad
       JOIN unit u ON ad.unit_id = u.unit_id
       JOIN owner o ON o.unit_id = u.unit_id
       JOIN bldg b ON b.bldg_id = u.bldg_id
-      JOIN assocdues_settings ads ON ad.assocsetting_id = ads.id
       WHERE u.unit_id = ?
       `,
       [unitId]
@@ -83,9 +79,32 @@ export const addAssocDues = async (req, res) => {
   }
 
   try {
+    // 1. Fetch snapshot values from assocdues_settings
+    const [settings] = await pool.query(
+      `SELECT amount, start_date, end_date, due_date
+         FROM assocdues_settings
+        WHERE id = ?`,
+      [assocSettingId]
+    );
+
+    if (settings.length === 0) {
+      return res.status(404).send("Association dues setting not found.");
+    }
+
+    const { amount, start_date, end_date, due_date } = settings[0];
+
     await pool.query(
-      "INSERT INTO association_dues (unit_id, assocsetting_id, total_amt, adjustment, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())",
-      [unitId, assocSettingId, total_amt, adjustment]
+      "INSERT INTO association_dues (unit_id, assocsetting_id, total_amt, adjustment, amount, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+      [
+        unitId,
+        assocSettingId,
+        parseFloat(total_amt),
+        parseFloat(adjustment),
+        amount,
+        start_date,
+        end_date,
+        due_date,
+      ]
     );
     res.redirect(`/assocBills/${unitId}`);
   } catch (error) {
@@ -100,9 +119,8 @@ export const generateAssocDuesPdf = async (req, res) => {
 
   try {
     const [assocRows] = await pool.query(
-      `SELECT a.*, (a.total_amt + a.adjustment) as final_amount, ads.amount, ads.start_date, ads.end_date, ads.due_date, o.first_name, o.last_name, b.bldg_name, u.unit_no
+      `SELECT a.*, a.total_amt, o.first_name, o.last_name, b.bldg_name, u.unit_no, u.unit_area
         FROM association_dues a
-        JOIN assocdues_settings ads ON ads.id = a.assocsetting_id
         JOIN unit u ON a.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
         JOIN bldg b ON b.bldg_id = u.bldg_id
@@ -115,8 +133,6 @@ export const generateAssocDuesPdf = async (req, res) => {
         .send("Association Dues record not found for this owner.");
     }
     const assocBill = assocRows[0];
-
-    assocBill.remaining_balance = assocBill.final_amount - assocBill.amt_paid;
 
     const htmlContent = await new Promise((resolve, reject) => {
       // Use req.app.render to get the HTML string without sending the response
@@ -178,14 +194,20 @@ export const generateAssocDuesPdf = async (req, res) => {
 //Generate Association Dues Report As Excel
 export const generateAssocDuesExcel = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT a.*, CONCAT('M', '', a.assoc_id) AS bill_no, (a.total_amt + a.adjustment) as final_amount, ads.amount, ads.start_date, ads.end_date, ads.due_date, CONCAT(o.first_name, ' ', o.last_name) AS owner_name, b.bldg_name, u.unit_no
+    const bldgId = req.params.bldgId;
+
+    const [rows] = await pool.query(
+      `
+      SELECT a.*, ap.*, CONCAT('M', '', a.assoc_id) AS bill_no, (a.total_amt + a.adjustment) as final_amount, CONCAT(o.first_name, ' ', o.last_name) AS owner_name, b.bldg_name, u.unit_no
         FROM association_dues a
-        JOIN assocdues_settings ads ON ads.id = a.assocsetting_id
         JOIN unit u ON a.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
-        JOIN bldg b ON b.bldg_id = u.bldg_id;
-    `);
+        JOIN bldg b ON b.bldg_id = u.bldg_id
+        LEFT JOIN assoc_payments ap ON ap.assoc_id = a.assoc_id
+        WHERE b.bldg_id = ?
+    `,
+      [bldgId]
+    );
 
     // Create a new Excel workbook and worksheet
     const workbook = new ExcelJS.Workbook();
@@ -204,7 +226,7 @@ export const generateAssocDuesExcel = async (req, res) => {
       { header: "Owner", key: "owner_name", width: 20 },
       { header: "Unit No.", key: "unit_no", width: 10 },
       { header: "AR No.", key: "ack_no", width: 15 },
-      { header: "Total Amt", key: "final_amount", width: 15 }, //with adjustment
+      { header: "Total Amt", key: "final_amount", width: 15 },
       { header: "Adjustment Fee", key: "adjustment", width: 15 },
       { header: "Amount Paid", key: "amt_paid", width: 15 },
       { header: "Period Start", key: "start_date", width: 15 },
@@ -230,10 +252,21 @@ export const generateAssocDuesExcel = async (req, res) => {
     rows.forEach((row) => {
       worksheet.addRow({
         ...row,
-        start_date: new Date(row.start_date).toLocaleDateString(),
-        end_date: new Date(row.end_date).toLocaleDateString(),
-        due_date: new Date(row.due_date).toLocaleDateString(),
-        date_paid: new Date(row.date_paid).toLocaleDateString(),
+        final_amount: row.final_amount ? Number(row.final_amount) : 0,
+        adjustment: row.adjustment ? Number(row.adjustment) : 0,
+        amt_paid: row.amt_paid ? Number(row.amt_paid) : 0,
+        start_date: row.start_date
+          ? new Date(row.start_date).toLocaleDateString()
+          : "",
+        end_date: row.end_date
+          ? new Date(row.end_date).toLocaleDateString()
+          : "",
+        due_date: row.due_date
+          ? new Date(row.due_date).toLocaleDateString()
+          : "",
+        date_paid: row.date_paid
+          ? new Date(row.date_paid).toLocaleDateString()
+          : "",
       });
     });
 
@@ -268,17 +301,16 @@ export const showEditAssocForm = async (req, res) => {
         ad.assoc_id,
         ad.total_amt,
         ad.adjustment,
-        DATE_FORMAT(ads.start_date, '%Y-%m-%d') AS start_date,
-        DATE_FORMAT(ads.end_date, '%Y-%m-%d') AS end_date,
-        DATE_FORMAT(ads.due_date, '%Y-%m-%d') AS due_date,
-        ads.amount
+        DATE_FORMAT(ad.start_date, '%Y-%m-%d') AS start_date,
+        DATE_FORMAT(ad.end_date, '%Y-%m-%d') AS end_date,
+        DATE_FORMAT(ad.due_date, '%Y-%m-%d') AS due_date,
+        ad.amount
       FROM
         association_dues ad
         JOIN unit u ON ad.unit_id = u.unit_id
         JOIN bldg b ON u.bldg_id = b.bldg_id
         JOIN settings s ON s.bldg_id = b.bldg_id
         AND s.category = "association_dues"
-        JOIN assocdues_settings ads ON ads.setting_id = s.setting_id
       WHERE
         ad.assoc_id = ?`,
       [assocId]
@@ -317,8 +349,56 @@ export const updateAssocDues = async (req, res) => {
   }
 };
 
-//Show Edit Payment Status
-export const showEditPaymentForm = async (req, res) => {
+//Show Payment List
+export const showPaymentList = async (req, res) => {
+  const assocId = req.params.id;
+
+  try {
+    const [unit] = await pool.query(
+      `
+      SELECT
+        ad.assoc_id,
+        u.unit_no,
+        u.unit_id
+      FROM association_dues ad
+        JOIN unit u ON u.unit_id = ad.unit_id
+      WHERE
+        ad.assoc_id = ?
+      `,
+      [assocId]
+    );
+
+    const [assocDues] = await pool.query(
+      `
+      SELECT
+        ap.assoc_id,
+		    ap.ack_no,
+		    ap.amt_paid,
+		    ap.date_paid,
+        u.unit_no,
+        u.unit_id
+      FROM
+        assoc_payments ap
+        JOIN association_dues ad ON ad.assoc_id = ap.assoc_id
+        JOIN unit u ON u.unit_id = ad.unit_id
+      WHERE
+        ap.assoc_id = ?`,
+      [assocId]
+    );
+
+    res.render("assocBills/paymentList", { assocDues, unit });
+  } catch (error) {
+    console.error("Error showing association dues payment list:", error);
+    res
+      .status(500)
+      .send(
+        "Error showing association dues payment list. Please check server logs."
+      );
+  }
+};
+
+//Show Create Payment
+export const showCreatePayment = async (req, res) => {
   const assocId = req.params.id;
 
   try {
@@ -331,30 +411,44 @@ export const showEditPaymentForm = async (req, res) => {
         CONCAT(o.first_name, ' ', o.last_name) AS owner_name,
         b.bldg_name,
         (ad.total_amt + COALESCE(ad.adjustment, 0)) as final_amount,
-        ads.start_date,
-        ads.end_date,
-        ads.due_date
+        ad.start_date,
+        ad.end_date,
+        ad.due_date
       FROM
         association_dues ad
         JOIN unit u ON ad.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
         JOIN bldg b ON b.bldg_id = u.bldg_id
-        JOIN assocdues_settings ads ON ad.assocsetting_id = ads.id
       WHERE
         ad.assoc_id = ?`,
       [assocId]
     );
 
+    const [assocPayRows] = await pool.query(
+      `
+      SELECT SUM(amt_paid) as total_paid FROM assoc_payments WHERE assoc_id = ?
+      `,
+      [assocId]
+    );
+
+    const totalAmt = parseFloat(assocDuesRows[0].total_amt) || 0;
+    const adjustment = parseFloat(assocDuesRows[0].adjustment) || 0;
+    const totalPaid = assocPayRows[0].total_paid || 0;
+    const finalAmount = totalAmt + adjustment;
+    const remainingBalance = finalAmount - totalPaid;
+
     if (assocDuesRows.length === 0) {
       return res.status(404).send("Association dues record not found.");
     }
 
-    const assocDues = assocDuesRows[0];
+    const assocDues = {
+      ...assocDuesRows[0],
+      amt_paid: totalPaid,
+      remaining_balance: remainingBalance,
+      final_amount: finalAmount,
+    };
 
-    // Calculate remaining balance
-    assocDues.remaining_balance = assocDues.final_amount - assocDues.amt_paid;
-
-    res.render("assocBills/payment", { assocDues });
+    res.render("assocBills/createPayment", { assocDues });
   } catch (error) {
     console.error("Error showing association dues payment:", error);
     res
@@ -365,8 +459,8 @@ export const showEditPaymentForm = async (req, res) => {
   }
 };
 
-//Edit Payment Status
-export const updatePayment = async (req, res) => {
+//Create Payment and update payment status
+export const insertPayment = async (req, res) => {
   const assocId = req.params.id;
   const { ack_no, payment_amount, date_paid } = req.body;
 
@@ -380,27 +474,50 @@ export const updatePayment = async (req, res) => {
   }
 
   try {
-    const [currentRecord] = await pool.query(
-      `SELECT total_amt, adjustment, amt_paid, unit_id 
-       FROM association_dues 
-       WHERE assoc_id = ?`,
+    const [[assocDues]] = await pool.query(
+      `SELECT total_amt, adjustment, unit_id, status FROM association_dues WHERE assoc_id = ?`,
       [assocId]
     );
 
-    if (currentRecord.length === 0) {
+    if (!assocDues) {
       return res.status(404).send("Association dues record not found.");
     }
 
-    const record = currentRecord[0];
-    const totalAmount = record.total_amt + (record.adjustment || 0);
-    const currentPaid = record.amt_paid || 0;
-    const newTotalPaid = currentPaid + parseFloat(payment_amount);
+    const totalAmt = parseFloat(assocDues.total_amt) || 0;
+    const adjustment = parseFloat(assocDues.adjustment) || 0;
+
+    const totalDue = totalAmt + adjustment;
+
+    // Sum up existing payments
+    const [[{ totalPaid }]] = await pool.query(
+      `SELECT SUM(amt_paid) as totalPaid FROM assoc_payments WHERE assoc_id = ?`,
+      [assocId]
+    );
+
+    const newTotalPaid =
+      parseFloat(totalPaid) || 0 + parseFloat(payment_amount) || 0;
+
+    // Prevent overpayment
+    if (newTotalPaid > totalDue) {
+      return res
+        .status(400)
+        .send(
+          `Payment exceeds total amount due. You still owe ${
+            totalDue - totalPaid
+          }`
+        );
+    }
+
+    const [payment] = await pool.query(
+      `INSERT INTO assoc_payments (assoc_id, ack_no, amt_paid, date_paid) VALUES (?, ?, ?, ?)`,
+      [assocId, ack_no, payment_amount, date_paid]
+    );
 
     // Determine new status
     let newStatus;
-    if (newTotalPaid >= totalAmount) {
+    if (newTotalPaid >= totalDue) {
       newStatus = "paid";
-    } else if (newTotalPaid > 0) {
+    } else if (newTotalPaid > 0 && newTotalPaid < totalDue) {
       newStatus = "partial";
     } else {
       newStatus = "unpaid";
@@ -409,16 +526,16 @@ export const updatePayment = async (req, res) => {
     // Update the payment information
     const [result] = await pool.query(
       `UPDATE association_dues 
-       SET amt_paid = ?, status = ?, ack_no = ?, date_paid = ?, updated_at = NOW() 
+       SET status = ?, updated_at = NOW() 
        WHERE assoc_id = ?`,
-      [newTotalPaid, newStatus, ack_no, date_paid, assocId]
+      [newStatus, assocId]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).send("Failed to update payment information.");
     }
 
-    res.redirect(`/assocBills/${record.unit_id}`);
+    res.redirect(`/assocBills/${assocDues.unit_id}`);
   } catch (error) {
     console.error("Error updating association dues:", error);
     res.status(500).send("Error updating association dues. Please try again.");
@@ -430,12 +547,18 @@ export const deleteAssocDues = async (req, res) => {
   const assocId = req.params.id;
 
   try {
+    const [[assocDues]] = await pool.query(
+      `SELECT unit_id FROM association_dues WHERE assoc_id = ?`,
+      [assocId]
+    );
+
     const [result] = await pool.query(
       "DELETE FROM association_dues WHERE assoc_id = ?",
       [assocId]
     );
 
     console.log("Deleted: ", result);
+    res.redirect(`/assocBills/${assocDues.unit_id}`);
   } catch (error) {
     console.error("Error deleting association dues:", error);
     res.status(500).send("Error deleting association dues. Please try again.");

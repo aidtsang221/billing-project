@@ -9,8 +9,8 @@
       body {
         font-family: Arial, sans-serif;
         margin: 0;
-        padding: 1in;
-        font-size: 10pt;
+        padding: 0.5in 1in;
+        font-size: 11pt;
         color: #333;
       }
       .container {
@@ -24,7 +24,7 @@
       h5,
       h6 {
         color: #2c3e50;
-        margin-top: 1.5em;
+        margin-top: 1.2em;
         margin-bottom: 0.5em;
       }
       .header,
@@ -41,9 +41,6 @@
         padding-top: 1em;
         font-size: 8pt;
         color: #777;
-      }
-      .bill-details p {
-        margin-bottom: 0.3em;
       }
       .summary-table {
         width: 100%;
@@ -68,74 +65,141 @@
       .text-muted {
         color: #6c757d !important;
       }
+      .bldg-name {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .charges-title {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        color: #444;
+      }
+      .banner {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .banner .logo {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+      }
     </style>
   </head>
   <body>
+    <div class="banner">
+      <img
+        src="http://localhost:3000/images/logo.jpg"
+        alt="Royal Peak Logo"
+        class="logo"
+      />
+    </div>
     <div class="container">
       <div class="header">
-        <h2>Utility Bill</h2>
-        <h3><%= util.bldg_name %></h3>
-        <p>Unit <%= util.unit_no %></p>
-        <p>Owner: <%= util.owner_name %></p>
+        <h2>Utility Bills Summary</h2>
       </div>
 
-      <div class="bill-details mb-4">
-        <p>
-          <strong>Bill Period:</strong> <%= new
-          Date(util.start_date).toLocaleDateString('en-US', { year: 'numeric',
-          month: 'long', day: 'numeric' }) %> to <%= new
-          Date(util.end_date).toLocaleDateString('en-US', { year: 'numeric',
-          month: 'long', day: 'numeric' }) %>
-        </p>
-        <p>
-          <strong>Due Date:</strong> <%= new
-          Date(util.due_date).toLocaleDateString('en-US', { year: 'numeric',
-          month: 'long', day: 'numeric' }) %>
-        </p>
-        <p>
-          <strong>Status:</strong> <%= util.status.charAt(0).toUpperCase() +
-          util.status.slice(1) %>
-        </p>
+      <%= %> <% if (util.length > 0) { %>
+      <div class="mb-5">
+        <!-- <h5 class="bldg-name"><%= util[0].bldg_name %></h5> -->
+        <p><strong>Unit</strong>: <%= util[0].unit_no %></p>
+        <p><strong>Owner</strong>: <%= util[0].owner_name %></p>
       </div>
+      <% } %>
 
-      <h4 class="mt-4 mb-3">Charges Breakdown</h4>
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Category</td>
-            <td>
-              <%= util.category.charAt(0).toUpperCase() + util.category.slice(1)
-              %>
-            </td>
-          </tr>
-          <tr>
-            <td>Cons. Rate</td>
-            <td><%= util.rate.toFixed(2) %></td>
-          </tr>
-          <tr>
-            <td>Previous Reading</td>
-            <td><%= util.prev_reading %></td>
-          </tr>
-          <tr>
-            <td>Current Reading</td>
-            <td><%= util.curr_reading %></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="row">
+        <% %> <% util.forEach((utilities, index) => { %>
+        <div class="col-6 mb-4">
+          <div class="p-3 border rounded">
+            <h3 class="text-center mb-3">
+              <%= utilities.category.toUpperCase() %> Bill
+            </h3>
 
-      <div class="total-amount mt-4">
-        Total Amount Due:
-        <span style="font-size: 1.5em"
-          >₱<%= ((util.curr_reading - util.prev_reading) *
-          util.rate).toLocaleString('en-US', { minimumFractionDigits: 2,
-          maximumFractionDigits: 2 }) %></span
-        >
+            <p>SORE<%= utilities.util_id %></p>
+            <p>
+              <strong>Bill Period:</strong>
+              <%= new Date(utilities.start_date).toLocaleDateString('en-US', {
+              year:'numeric', month:'long', day:'numeric' }) %> to <%= new
+              Date(utilities.end_date).toLocaleDateString('en-US', {
+              year:'numeric', month:'long', day:'numeric' }) %>
+            </p>
+            <p>
+              <strong>Due Date:</strong>
+              <%= new Date(utilities.due_date).toLocaleDateString('en-US', {
+              year:'numeric', month:'long', day:'numeric' }) %>
+            </p>
+            <% if(utilities.category == 'water' || utilities.category ==
+            'electricity') { %>
+            <p>
+              <strong>Rate:</strong>
+              <%= parseFloat(utilities.rate).toLocaleString('en-US', {
+              minimumFractionDigits: 2, maximumFractionDigits: 2 }) %> <% if
+              (utilities.category === 'water') { %> / m<sup>3</sup> <% } else if
+              (utilities.category === 'electricity') { %> / kWh <% } %>
+            </p>
+            <% } %>
+
+            <h6 class="charges-title">Charges Breakdown</h6>
+            <table class="summary-table">
+              <tbody>
+                <% if(utilities.category == 'water' || utilities.category ==
+                'electricity') { %>
+                <tr>
+                  <td>Previous Reading</td>
+                  <td>
+                    <%=
+                    parseFloat(utilities.prev_reading).toLocaleString('en-US', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Current Reading</td>
+                  <td>
+                    <%=
+                    parseFloat(utilities.curr_reading).toLocaleString('en-US', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Total Consumption</td>
+                  <td>
+                    <%= parseFloat(utilities.curr_reading -
+                    utilities.prev_reading).toLocaleString('en-US', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </td>
+                </tr>
+                <% } else { %>
+                <tr>
+                  <td colspan="2" class="text-center">
+                    <strong>Internet Rate:</strong> ₱<%=
+                    parseFloat(utilities.rate).toLocaleString('en-US', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+
+            <div class="total-amount mt-3">
+              Total Amount Due:
+              <span style="font-size: 1.2em">
+                ₱<%= parseFloat(utilities.total_amt).toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <% if ((index + 1) % 2 === 0) { %>
+      </div>
+      <div class="row">
+        <!-- force new row after 2 bills -->
+        <% } %> <% }) %>
       </div>
 
       <div class="footer">
