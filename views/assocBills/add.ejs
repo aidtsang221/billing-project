@@ -58,15 +58,45 @@
           <div class="row">
             <div class="mb-3">
               <label for="adjustment" class="form-label">Adjustment Fee:</label>
-              <input
-                type="number"
-                class="form-control"
-                id="adjustment"
-                name="adjustment"
-                value="0"
-                step="any"
-              />
+              <div class="input-group mb-2">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="adjustment"
+                  name="adjustment"
+                  value="0"
+                  step="any"
+                  disabled
+                />
+                <button type="button" class="btn btn-primary" id="sendOtpBtn">
+                  Send OTP
+                </button>
+              </div>
+
+              <!-- OTP Section -->
+              <div id="otpSection">
+                <label class="form-label">Enter OTP:</label>
+
+                <div class="input-group mb-2">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="otpInput"
+                    placeholder="Enter OTP"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    id="verifyOtpBtn"
+                  >
+                    Verify OTP
+                  </button>
+                </div>
+
+                <div id="otpAlertContainer"></div>
+              </div>
             </div>
+
             <div class="col-md-4 mb-3">
               <label for="start_date" class="form-label"
                 >Billing Period Start:</label
@@ -155,6 +185,89 @@
         adjustmentInput.addEventListener("input", calculateAndDisplayTotal);
 
         calculateAndDisplayTotal();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const sendOtpBtn = document.getElementById("sendOtpBtn");
+        const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+
+        const otpInput = document.getElementById("otpInput");
+        const otpAlertContainer = document.getElementById("otpAlertContainer");
+
+        const adjustmentInput = document.getElementById("adjustment");
+
+        sendOtpBtn.addEventListener("click", async () => {
+          otpAlertContainer.innerHTML = "";
+
+          try {
+            const response = await fetch (
+              `/assocBills/add/<%= unit.unit_id %>/send-otp`,
+              {
+                method: "POST"
+              }
+            );
+
+            const data = await response.json();
+
+            if (data.success) {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-info">OTP has been sent to your email.</div>
+              `;
+            } else {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger">Failed to send OTP. Try again.</div>
+              `;
+            }
+          } catch (err) {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger">Error sending OTP.</div>
+              `;
+          }
+        });
+
+        verifyOtpBtn.addEventListener("click", async () => {
+          const otpValue = otpInput.value;
+
+          if(!otpValue) {
+            otpAlertContainer.innerHTML = `
+              <div class="alert alert-warning">Please enter the OTP.</div>
+            `;
+            return;
+          };
+
+          try {
+            const response = await fetch(
+              `/assocBills/add/<%= unit.unit_id %>/verify-otp`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ otp: otpValue }),
+              }
+            );
+
+            const data = await response.json();
+
+            if (data.valid === true) {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-success">OTP verified successfully!</div>
+              `;
+
+              adjustmentInput.disabled = false;
+            } else {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger">Incorrect OTP. Please try again.</div>
+              `;
+
+              adjustmentInput.disabled = true;
+            }
+          } catch (err) {
+            otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger">Error verifying OTP.</div>
+            `;
+          }
+        });
       });
     </script>
   </body>

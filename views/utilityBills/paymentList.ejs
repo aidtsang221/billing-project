@@ -40,7 +40,7 @@
             <% util.forEach(bill => { %>
             <tr>
               <td><%= bill.ack_no %></td>
-              <td><%= bill.amt_paid.toFixed(2) %></td>
+              <td><%= bill.amt_paid %></td>
               <td><%= new Date(bill.date_paid).toLocaleDateString() %></td>
             </tr>
             <% }); %>

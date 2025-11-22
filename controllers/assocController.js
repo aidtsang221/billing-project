@@ -1,6 +1,22 @@
 import pool from "../db.js";
 import puppeteer from "puppeteer";
 import ExcelJS from "exceljs";
+import nodemailer from "nodemailer";
+
+// Variable to temporarily store OTP
+let generatedOTP = null;
+
+// Create nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "aidantwo86@gmail.com",
+    pass: "nejr ewpj fmuq lngx",
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 // Get All AssocDues Bills by unit id
 export const getAllAssocDues = async (req, res) => {
@@ -562,5 +578,39 @@ export const deleteAssocDues = async (req, res) => {
   } catch (error) {
     console.error("Error deleting association dues:", error);
     res.status(500).send("Error deleting association dues. Please try again.");
+  }
+};
+
+export const sendOTP = async (req, res) => {
+  // Generate random number 1–100
+  generatedOTP = Math.floor(Math.random() * 100) + 1;
+
+  console.log("Generated OTP:", generatedOTP);
+
+  //email of the person
+  const emailToSend = "xekoj49255@feralrex.com";
+
+  try {
+    await transporter.sendMail({
+      from: "aidantwo86@gmail.com",
+      to: emailToSend,
+      subject: "Your OTP Code",
+      text: `Your OTP is: ${generatedOTP}`,
+    });
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Error sending email:", err);
+    return res.json({ success: false });
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  const userOTP = parseInt(req.body.otp);
+
+  if (userOTP === generatedOTP) {
+    return res.json({ valid: true });
+  } else {
+    return res.json({ valid: false });
   }
 };

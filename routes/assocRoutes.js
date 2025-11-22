@@ -9,6 +9,10 @@ router.get("/:unitId", assocController.getAllAssocDues);
 
 router.get("/add/:unitId", assocController.showAddForm);
 
+router.post("/add/:unitId/send-otp", assocController.sendOTP);
+
+router.post("/add/:unitId/verify-otp", assocController.verifyOTP);
+
 router.post("/:unitId", assocController.addAssocDues);
 
 router.get("/edit/:id", assocController.showEditAssocForm);
