@@ -558,8 +558,8 @@ export const insertPayment = async (req, res) => {
   }
 };
 
-//Delete Association Dues
-export const deleteAssocDues = async (req, res) => {
+//Update Association Dues to Cancel
+export const cancelAssocDues = async (req, res) => {
   const assocId = req.params.id;
 
   try {
@@ -569,11 +569,13 @@ export const deleteAssocDues = async (req, res) => {
     );
 
     const [result] = await pool.query(
-      "DELETE FROM association_dues WHERE assoc_id = ?",
+      `UPDATE association_dues
+       SET status = 'cancelled', updated_at = NOW()
+       WHERE assoc_id = ?
+       `,
       [assocId]
     );
 
-    console.log("Deleted: ", result);
     res.redirect(`/assocBills/${assocDues.unit_id}`);
   } catch (error) {
     console.error("Error deleting association dues:", error);

@@ -18,6 +18,16 @@
       </div>
 
       <% if (units.length > 0) { %>
+      <!-- Search Bar -->
+      <div class="mb-3">
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control"
+          placeholder="Search by Building Name or Unit No..."
+        />
+      </div>
+
       <div class="table-responsive">
         <table class="table table-striped table-hover">
           <thead class="table-dark">
@@ -64,5 +74,30 @@
     </div>
 
     <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // This function runs every time the user types in the search bar
+      document
+        .getElementById("searchInput")
+        .addEventListener("keyup", function () {
+          const searchValue = this.value.toLowerCase();
+          const tableRows = document.querySelectorAll("tbody tr");
+
+          tableRows.forEach((row) => {
+            // get the text from the first 2 columns (building name + unit no.)
+            const bldgName = row.children[0].textContent.toLowerCase();
+            const unitNo = row.children[1].textContent.toLowerCase();
+
+            // Check if either contains the search text
+            if (
+              bldgName.includes(searchValue) ||
+              unitNo.includes(searchValue)
+            ) {
+              row.style.display = ""; // show row
+            } else {
+              row.style.display = "none"; //hide row
+            }
+          });
+        });
+    </script>
   </body>
 </html>

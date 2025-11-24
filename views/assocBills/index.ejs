@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Association Dues</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      .disabled-row {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    </style>
   </head>
   <body>
     <%- include('../partials/navbar') %>
@@ -50,7 +56,9 @@
           </thead>
           <tbody>
             <% assocDues.forEach(bill => { %>
-            <tr>
+            <tr
+              class="<%= bill.status === 'cancelled' ? 'disabled-row' : '' %>"
+            >
               <td>M<%= bill.assoc_id %></td>
               <td><%= bill.owner_name %></td>
               <td><%= bill.unit_no %></td>
@@ -99,19 +107,23 @@
                   target="_blank"
                   >Generate PDF</a
                 >
-                <!-- <form
-                  action="/assocBills/delete/<%= bill.assoc_id %>"
+
+                <% if (bill.status !== 'cancelled' && bill.status !== 'paid') {
+                %>
+                <form
+                  action="/assocBills/<%= bill.assoc_id %>/cancel"
                   method="POST"
                   class="d-inline"
                 >
                   <button
                     type="submit"
-                    class="btn btn-danger btn-sm"
-                    onclick="return confirm('Are you sure you want to delete this association dues record?');"
+                    class="btn btn-warning btn-sm"
+                    onclick="return confirm('Are you sure you want to cancel this bill?');"
                   >
-                    Delete
+                    Cancel
                   </button>
-                </form> -->
+                </form>
+                <% } %>
               </td>
             </tr>
             <% }); %>
