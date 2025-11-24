@@ -587,9 +587,7 @@ export const sendOTP = async (req, res) => {
   // Generate random number 1–100
   generatedOTP = Math.floor(Math.random() * 100) + 1;
 
-  console.log("Generated OTP:", generatedOTP);
-
-  //email of the person
+  //email of the person - to be changed
   const emailToSend = "xekoj49255@feralrex.com";
 
   try {

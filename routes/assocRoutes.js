@@ -13,6 +13,10 @@ router.post("/add/:unitId/send-otp", assocController.sendOTP);
 
 router.post("/add/:unitId/verify-otp", assocController.verifyOTP);
 
+router.post("/edit/:id/send-otp", assocController.sendOTP);
+
+router.post("/edit/:id/verify-otp", assocController.verifyOTP);
+
 router.post("/:unitId", assocController.addAssocDues);
 
 router.get("/edit/:id", assocController.showEditAssocForm);

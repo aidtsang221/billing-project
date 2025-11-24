@@ -57,14 +57,45 @@
           <div class="row">
             <div class="mb-3">
               <label for="adjustment" class="form-label">Adjustment Fee:</label>
-              <input
-                type="number"
-                class="form-control"
-                id="adjustment"
-                name="adjustment"
-                value="<%= assocDues.adjustment %>"
-              />
+              <div class="input-group mb-2">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="adjustment"
+                  name="adjustment"
+                  value="<%= assocDues.adjustment %>"
+                  step="any"
+                  disabled
+                />
+                <button type="button" class="btn btn-primary" id="sendOtpBtn">
+                  Send OTP
+                </button>
+              </div>
+
+              <!-- OTP Section -->
+              <div id="otpSection" style="display: none">
+                <label class="form-label">Enter OTP:</label>
+
+                <div class="input-group mb-2">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="otpInput"
+                    placeholder="Enter OTP"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    id="verifyOtpBtn"
+                  >
+                    Verify OTP
+                  </button>
+                </div>
+
+                <div id="otpAlertContainer"></div>
+              </div>
             </div>
+
             <div class="col-md-4 mb-3">
               <label for="start_date" class="form-label"
                 >Billing Period Start:</label
@@ -152,6 +183,113 @@
         adjustmentInput.addEventListener("input", calculateAndDisplayTotal);
 
         calculateAndDisplayTotal();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const sendOtpBtn = document.getElementById("sendOtpBtn");
+        const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+
+        const otpInput = document.getElementById("otpInput");
+        const otpAlertContainer = document.getElementById("otpAlertContainer");
+
+        const adjustmentInput = document.getElementById("adjustment");
+        const otpSection = document.getElementById("otpSection");
+
+        sendOtpBtn.addEventListener("click", async () => {
+          otpAlertContainer.innerHTML = "";
+
+          otpSection.style.display = "block";
+
+          try {
+            const response = await fetch (
+              `/assocBills/edit/<%= assocDues.assoc_id %>/send-otp`,
+              {
+                method: "POST"
+              }
+            );
+
+            const data = await response.json();
+
+            if (data.success) {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                  OTP has been sent to your email.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              `;
+            } else {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  Failed to send OTP. Try again.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              `;
+            }
+          } catch (err) {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" alert="role">
+                  Error sending OTP.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              `;
+          }
+        });
+
+        verifyOtpBtn.addEventListener("click", async () => {
+          const otpValue = otpInput.value;
+
+          if(!otpValue) {
+            otpAlertContainer.innerHTML = `
+              <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Please enter the OTP.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            `;
+            return;
+          };
+
+          try {
+            const response = await fetch(
+              `/assocBills/edit/<%= assocDues.assoc_id %>/verify-otp`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ otp: otpValue }),
+              }
+            );
+
+            const data = await response.json();
+
+            if (data.valid === true) {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  OTP verified successfully!
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              `;
+
+              adjustmentInput.disabled = false;
+            } else {
+              otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  Incorrect OTP. Please try again.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+              `;
+
+              adjustmentInput.disabled = true;
+            }
+          } catch (err) {
+            otpAlertContainer.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  Error verifying OTP.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+          }
+        });
       });
     </script>
   </body>
