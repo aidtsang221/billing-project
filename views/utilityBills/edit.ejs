@@ -75,7 +75,7 @@
             <h4 class="alert-heading">Total Amount Due</h4>
             <p class="mb-0 fs-2 fw-bold">
               ₱<span id="totalAmountDisplay"
-                ><%= utilityBill.total_amt.toLocaleString('en-US', {
+                ><%= parseFloat(utilityBill.total_amt).toLocaleString('en-US', {
                 minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span
               >
             </p>

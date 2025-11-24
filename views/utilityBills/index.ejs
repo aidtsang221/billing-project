@@ -98,12 +98,15 @@
                 <%= bill.category.charAt(0).toUpperCase() +
                 bill.category.slice(1) %>
               </td>
-              <td><%= bill.rate %></td>
-              <td><%= bill.prev_reading %></td>
-              <td><%= bill.curr_reading %></td>
+              <td><%= parseFloat(bill.rate).toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+              <td><%= parseFloat(bill.prev_reading).toLocaleString('en-US', {
+                  minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+              <td><%= parseFloat(bill.curr_reading).toLocaleString('en-US', {
+                  minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
               <td>
                 <b
-                  ><%= bill.total_amt.toLocaleString('en-US', {
+                  ><%= parseFloat(bill.total_amt).toLocaleString('en-US', {
                   minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></b
                 >
               </td>

@@ -62,14 +62,18 @@
               <td>M<%= bill.assoc_id %></td>
               <td><%= bill.owner_name %></td>
               <td><%= bill.unit_no %></td>
-              <td><%= bill.amount %></td>
               <td>
-                <%= bill.adjustment.toLocaleString('en-US', {
+                <%= parseFloat(bill.amount).toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+              </td>
+              <td>
+                <%= parseFloat(bill.adjustment).toLocaleString('en-US', {
                 minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
               </td>
               <td>
                 <strong>
-                  <%= bill.total_amt ? bill.total_amt.toLocaleString('en-US', {
+                  <%= bill.total_amt ?
+                  parseFloat(bill.total_amt).toLocaleString('en-US', {
                   minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'
                   %>
                 </strong>
