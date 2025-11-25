@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Utility Bills</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      .disabled-row {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    </style>
   </head>
   <body>
     <%- include('../partials/navbar') %>
@@ -87,7 +93,7 @@
           </thead>
           <tbody>
             <% utilities.forEach(bill => { %>
-            <tr>
+            <tr class="<%= bill.status === 'cancelled' ? 'disabled-row' : '' %>">
               <td>
                 <input type="checkbox" name="selectedBills" value="<%= bill.util_id %>" class="billCheckbox" />
               </td>
@@ -137,19 +143,22 @@
                   class="btn btn-primary btn-sm me-2"
                   >Edit</a
                 >
-                <!-- <form
-                  action="/billing/utility/delete/<%= bill.util_id %>"
+                <% if (bill.status !== 'cancelled' && bill.status !== 'paid') {
+                %>
+                <form
+                  action="/utilityBills/<%= bill.util_id %>/cancel"
                   method="POST"
                   class="d-inline"
                 >
                   <button
                     type="submit"
-                    class="btn btn-danger btn-sm"
-                    onclick="return confirm('Are you sure you want to delete this utility bill record?');"
+                    class="btn btn-warning btn-sm"
+                    onclick="return confirm('Are you sure you want to cancel this bill?');"
                   >
-                    Delete
+                    Cancel
                   </button>
-                </form> -->
+                </form>
+                <% } %>
               </td>
             </tr>
             <% }); %>

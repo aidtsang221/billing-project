@@ -25,4 +25,6 @@ router.get("/createPayment/:id", utilController.showCreatePayment);
 
 router.post("/createPayment/:id", utilController.insertPayment);
 
+router.post("/:id/cancel", utilController.cancelUtilities);
+
 export default router;

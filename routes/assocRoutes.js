@@ -31,6 +31,6 @@ router.get("/createPayment/:id", assocController.showCreatePayment);
 
 router.post("/createPayment/:id", assocController.insertPayment);
 
-router.post("/:id/cancel", assocController.cancelAssocDues); //Cancel
+router.post("/:id/cancel", assocController.cancelAssocDues);
 
 export default router;

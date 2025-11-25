@@ -578,8 +578,10 @@ export const cancelAssocDues = async (req, res) => {
 
     res.redirect(`/assocBills/${assocDues.unit_id}`);
   } catch (error) {
-    console.error("Error deleting association dues:", error);
-    res.status(500).send("Error deleting association dues. Please try again.");
+    console.error("Error cancelling association dues:", error);
+    res
+      .status(500)
+      .send("Error cancelling association dues. Please try again.");
   }
 };
 

@@ -661,8 +661,8 @@ export const generateInternetExcel = async (req, res) => {
   }
 };
 
-//Delete Utilities
-export const deleteUtilities = async (req, res) => {
+//Cancel Utilities
+export const cancelUtilities = async (req, res) => {
   const utilId = req.params.id;
 
   try {
@@ -671,14 +671,19 @@ export const deleteUtilities = async (req, res) => {
       [utilId]
     );
 
-    const [result] = await pool.query("DELETE FROM utility WHERE util_id = ?", [
-      utilId,
-    ]);
+    const [result] = await pool.query(
+      `
+      UPDATE utility
+      SET status = 'cancelled', updated_at = NOW()
+      WHERE util_id = ?
+      `,
+      [utilId]
+    );
 
-    console.log("Deleted: ", result);
+    console.log("Cancelled: ", result);
     res.redirect(`/utilityBills/${utils.unit_id}`);
   } catch (error) {
-    console.error("Error deleting association dues:", error);
-    res.status(500).send("Error deleting association dues. Please try again.");
+    console.error("Error cancelling utilities:", error);
+    res.status(500).send("Error cancelling utilities. Please try again.");
   }
 };
