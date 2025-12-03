@@ -1,6 +1,22 @@
 import pool from "../db.js";
 import puppeteer from "puppeteer";
 import ExcelJS from "exceljs";
+import nodemailer from "nodemailer";
+
+// Variable to temporarily store OTP
+let generatedOTP = null;
+
+// Create nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "aidantwo86@gmail.com",
+    pass: "nejr ewpj fmuq lngx",
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 // Get All Utility Bills of water and electric by unit id
 export const getAllUtils = async (req, res) => {
@@ -47,7 +63,7 @@ export const getAllUtils = async (req, res) => {
   }
 };
 
-// Display Add Form without net
+// Display Add Form
 export const showAddForm = async (req, res) => {
   const unitId = req.params.unitId;
   try {
@@ -90,7 +106,8 @@ export const showAddForm = async (req, res) => {
 // Create New Utility Bill of unit id
 export const addUtilityBill = async (req, res) => {
   const unitId = req.params.unitId;
-  const { utilSettingId, prev_reading, curr_reading, total_amt } = req.body;
+  const { adjustment, utilSettingId, prev_reading, curr_reading, total_amt } =
+    req.body;
 
   // Basic validation
   if (!utilSettingId || !total_amt) {
@@ -112,12 +129,13 @@ export const addUtilityBill = async (req, res) => {
     const { rate, start_date, end_date, due_date } = settings[0];
 
     await pool.query(
-      "INSERT INTO utility (unit_id, utilsetting_id, prev_reading, curr_reading, total_amt, rate, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+      "INSERT INTO utility (unit_id, utilsetting_id, prev_reading, curr_reading, adjustment, total_amt, rate, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
       [
         unitId,
         utilSettingId,
         prev_reading || 0,
         curr_reading || 0,
+        adjustment,
         total_amt,
         rate,
         start_date,
@@ -218,6 +236,7 @@ export const showEditUtilityForm = async (req, res) => {
         ut.curr_reading,
         ut.utilsetting_id,
         ut.total_amt,
+        ut.adjustment,
         DATE_FORMAT(ut.start_date, '%Y-%m-%d') AS start_date,
         DATE_FORMAT(ut.end_date, '%Y-%m-%d') AS end_date,
         DATE_FORMAT(ut.due_date, '%Y-%m-%d') AS due_date,
@@ -265,13 +284,26 @@ export const showEditUtilityForm = async (req, res) => {
 //Edit Utility
 export const updateUtilityBill = async (req, res) => {
   const utilId = req.params.id;
-  const { utilSettingId, prev_reading, curr_reading, total_amt, unit_id } =
-    req.body;
+  const {
+    utilSettingId,
+    prev_reading,
+    curr_reading,
+    total_amt,
+    unit_id,
+    adjustment,
+  } = req.body;
 
   try {
     const [result] = await pool.query(
-      "UPDATE utility SET utilsetting_id = ?, prev_reading = ?, curr_reading = ?, total_amt = ? WHERE util_id = ?",
-      [utilSettingId, prev_reading || 0, curr_reading || 0, total_amt, utilId]
+      "UPDATE utility SET utilsetting_id = ?, prev_reading = ?, curr_reading = ?, total_amt = ?, adjustment = ? WHERE util_id = ?",
+      [
+        utilSettingId,
+        prev_reading || 0,
+        curr_reading || 0,
+        total_amt,
+        adjustment,
+        utilId,
+      ]
     );
 
     res.redirect(`/utilityBills/${unit_id}`);
@@ -685,5 +717,37 @@ export const cancelUtilities = async (req, res) => {
   } catch (error) {
     console.error("Error cancelling utilities:", error);
     res.status(500).send("Error cancelling utilities. Please try again.");
+  }
+};
+
+export const sendOTP = async (req, res) => {
+  // Generate random number 1–100
+  generatedOTP = Math.floor(Math.random() * 100) + 1;
+
+  //email of the person - to be changed
+  const emailToSend = "xikim89054@cexch.com";
+
+  try {
+    await transporter.sendMail({
+      from: "aidantwo86@gmail.com",
+      to: emailToSend,
+      subject: "Your OTP Code",
+      text: `Your OTP is: ${generatedOTP}`,
+    });
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Error sending email:", err);
+    return res.json({ success: false });
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  const userOTP = parseInt(req.body.otp);
+
+  if (userOTP === generatedOTP) {
+    return res.json({ valid: true });
+  } else {
+    return res.json({ valid: false });
   }
 };

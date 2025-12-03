@@ -84,6 +84,7 @@
               <th>Rate</th>
               <th>Previous Reading</th>
               <th>Current Reading</th>
+              <th>Adjustment Fee</th>
               <th>Total Amount</th>
               <th>Period</th>
               <th>Due Date</th>
@@ -109,6 +110,8 @@
               <td><%= parseFloat(bill.prev_reading).toLocaleString('en-US', {
                   minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
               <td><%= parseFloat(bill.curr_reading).toLocaleString('en-US', {
+                  minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+              <td><%= parseFloat(bill.adjustment).toLocaleString('en-US', {
                   minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
               <td>
                 <b

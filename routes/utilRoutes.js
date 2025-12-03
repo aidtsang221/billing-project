@@ -15,9 +15,17 @@ router.get("/add/:unitId", utilController.showAddForm);
 
 router.post("/:unitId", utilController.addUtilityBill);
 
+router.post("/add/:unitId/send-otp", utilController.sendOTP);
+
+router.post("/add/:unitId/verify-otp", utilController.verifyOTP);
+
 router.get("/edit/:id", utilController.showEditUtilityForm);
 
 router.post("/edit/:id", utilController.updateUtilityBill);
+
+router.post("/edit/:id/send-otp", utilController.sendOTP);
+
+router.post("/edit/:id/verify-otp", utilController.verifyOTP);
 
 router.get("/paymentList/:id", utilController.showPaymentList);
 
