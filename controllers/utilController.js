@@ -135,7 +135,7 @@ export const addUtilityBill = async (req, res) => {
         utilSettingId,
         prev_reading || 0,
         curr_reading || 0,
-        adjustment,
+        adjustment || 0,
         total_amt,
         rate,
         start_date,
@@ -301,7 +301,7 @@ export const updateUtilityBill = async (req, res) => {
         prev_reading || 0,
         curr_reading || 0,
         total_amt,
-        adjustment,
+        adjustment || 0,
         utilId,
       ]
     );
@@ -442,8 +442,9 @@ export const insertPayment = async (req, res) => {
       [utilId]
     );
 
-    const newTotalPaid =
-      parseFloat(totalPaid) || 0 + parseFloat(payment_amount) || 0;
+    const newTotalPaid = (
+      (parseFloat(totalPaid) || 0) + (parseFloat(payment_amount) || 0)
+    ).toFixed(2);
 
     // Prevent overpayment
     if (newTotalPaid > totalDue) {
@@ -485,22 +486,6 @@ export const insertPayment = async (req, res) => {
   } catch (error) {
     console.error("Error updating utility:", error);
     res.status(500).send("Error updating utility. Please try again.");
-  }
-};
-
-//Delete Utility Bill
-export const deleteUtility = async (req, res) => {
-  const utilId = req.params.id;
-
-  try {
-    const [result] = await pool.query("DELETE FROM utility WHERE util_id = ?", [
-      utilId,
-    ]);
-
-    console.log("Deleted: ", result);
-  } catch (error) {
-    console.error("Error deleting utility:", error);
-    res.status(500).send("Error deleting utility. Please try again.");
   }
 };
 
@@ -712,7 +697,6 @@ export const cancelUtilities = async (req, res) => {
       [utilId]
     );
 
-    console.log("Cancelled: ", result);
     res.redirect(`/utilityBills/${utils.unit_id}`);
   } catch (error) {
     console.error("Error cancelling utilities:", error);
@@ -725,7 +709,7 @@ export const sendOTP = async (req, res) => {
   generatedOTP = Math.floor(Math.random() * 100) + 1;
 
   //email of the person - to be changed
-  const emailToSend = "xikim89054@cexch.com";
+  const emailToSend = "wowev29411@mucate.com";
 
   try {
     await transporter.sendMail({

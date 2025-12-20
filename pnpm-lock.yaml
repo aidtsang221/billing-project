@@ -14,6 +14,15 @@ importers:
       bootstrap:
         specifier: ^5.3.8
         version: 5.3.8(@popperjs/core@2.11.8)
+      datatables.net:
+        specifier: ^2.3.5
+        version: 2.3.5
+      datatables.net-bs5:
+        specifier: ^2.3.5
+        version: 2.3.5
+      datatables.net-dt:
+        specifier: ^2.3.5
+        version: 2.3.5
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -26,6 +35,9 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
+      jquery:
+        specifier: ^3.7.1
+        version: 3.7.1
       mysql2:
         specifier: ^3.15.3
         version: 3.15.3
@@ -314,6 +326,15 @@ packages:
   data-uri-to-buffer@6.0.2:
     resolution: {integrity: sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw==}
     engines: {node: '>= 14'}
+
+  datatables.net-bs5@2.3.5:
+    resolution: {integrity: sha512-2JA2WZz1tBxdVpYAspiqI8POdqEoAZZzqp7tISKaof2P5ufBJb+OLaahxwuB0sF9qcQh1azlU+JH1zsLBXVwXg==}
+
+  datatables.net-dt@2.3.5:
+    resolution: {integrity: sha512-JJkMNM03RUkv4jwAqyXsDHqUTEvti3+15466QiauzqRCmBOSwrHoglt1sRbvBwsv2isrCObp50JemgfG8R3wEQ==}
+
+  datatables.net@2.3.5:
+    resolution: {integrity: sha512-Qrwc+vuw8GHo42u1usWTuriNAMW0VvLPSW3j8g3GxvatiD8wS/ZGW32VAYLLfmF4Hz0C/fo2KB3xZBfcpqqVTQ==}
 
   dayjs@1.11.19:
     resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
@@ -617,6 +638,9 @@ packages:
     resolution: {integrity: sha512-wpHYzhxiVQL+IV05BLE2Xn34zW1S223hvjtqk0+gsPrwd/8JNLXJgZZM/iPFsYc1xyphF+6M6EvdE5E9MBGkDA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  jquery@3.7.1:
+    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -1415,6 +1439,20 @@ snapshots:
 
   data-uri-to-buffer@6.0.2: {}
 
+  datatables.net-bs5@2.3.5:
+    dependencies:
+      datatables.net: 2.3.5
+      jquery: 3.7.1
+
+  datatables.net-dt@2.3.5:
+    dependencies:
+      datatables.net: 2.3.5
+      jquery: 3.7.1
+
+  datatables.net@2.3.5:
+    dependencies:
+      jquery: 3.7.1
+
   dayjs@1.11.19: {}
 
   debug@4.4.3(supports-color@5.5.0):
@@ -1745,6 +1783,8 @@ snapshots:
       async: 3.2.6
       filelist: 1.0.4
       picocolors: 1.1.1
+
+  jquery@3.7.1: {}
 
   js-tokens@4.0.0: {}
 

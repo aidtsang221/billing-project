@@ -115,7 +115,7 @@ export const addAssocDues = async (req, res) => {
         unitId,
         assocSettingId,
         parseFloat(total_amt),
-        parseFloat(adjustment),
+        parseFloat(adjustment) || 0,
         amount,
         start_date,
         end_date,
@@ -351,7 +351,7 @@ export const updateAssocDues = async (req, res) => {
   try {
     const [result] = await pool.query(
       "UPDATE association_dues SET adjustment = ? WHERE assoc_id = ?",
-      [adjustment, assocId]
+      [adjustment || 0, assocId]
     );
     if (result.affectedRows === 0) {
       return res
@@ -426,7 +426,6 @@ export const showCreatePayment = async (req, res) => {
         u.unit_id,
         CONCAT(o.first_name, ' ', o.last_name) AS owner_name,
         b.bldg_name,
-        (ad.total_amt + COALESCE(ad.adjustment, 0)) as final_amount,
         ad.start_date,
         ad.end_date,
         ad.due_date
@@ -448,10 +447,8 @@ export const showCreatePayment = async (req, res) => {
     );
 
     const totalAmt = parseFloat(assocDuesRows[0].total_amt) || 0;
-    const adjustment = parseFloat(assocDuesRows[0].adjustment) || 0;
     const totalPaid = assocPayRows[0].total_paid || 0;
-    const finalAmount = totalAmt + adjustment;
-    const remainingBalance = finalAmount - totalPaid;
+    const remainingBalance = totalAmt - totalPaid;
 
     if (assocDuesRows.length === 0) {
       return res.status(404).send("Association dues record not found.");
@@ -461,7 +458,7 @@ export const showCreatePayment = async (req, res) => {
       ...assocDuesRows[0],
       amt_paid: totalPaid,
       remaining_balance: remainingBalance,
-      final_amount: finalAmount,
+      final_amount: totalAmt,
     };
 
     res.render("assocBills/createPayment", { assocDues });
@@ -491,7 +488,7 @@ export const insertPayment = async (req, res) => {
 
   try {
     const [[assocDues]] = await pool.query(
-      `SELECT total_amt, adjustment, unit_id, status FROM association_dues WHERE assoc_id = ?`,
+      `SELECT total_amt, unit_id, status FROM association_dues WHERE assoc_id = ?`,
       [assocId]
     );
 
@@ -500,9 +497,6 @@ export const insertPayment = async (req, res) => {
     }
 
     const totalAmt = parseFloat(assocDues.total_amt) || 0;
-    const adjustment = parseFloat(assocDues.adjustment) || 0;
-
-    const totalDue = totalAmt + adjustment;
 
     // Sum up existing payments
     const [[{ totalPaid }]] = await pool.query(
@@ -510,16 +504,17 @@ export const insertPayment = async (req, res) => {
       [assocId]
     );
 
-    const newTotalPaid =
-      parseFloat(totalPaid) || 0 + parseFloat(payment_amount) || 0;
+    const newTotalPaid = (
+      (parseFloat(totalPaid) || 0) + (parseFloat(payment_amount) || 0)
+    ).toFixed(2);
 
     // Prevent overpayment
-    if (newTotalPaid > totalDue) {
+    if (newTotalPaid > totalAmt) {
       return res
         .status(400)
         .send(
           `Payment exceeds total amount due. You still owe ${
-            totalDue - totalPaid
+            totalAmt - totalPaid
           }`
         );
     }
@@ -531,9 +526,9 @@ export const insertPayment = async (req, res) => {
 
     // Determine new status
     let newStatus;
-    if (newTotalPaid >= totalDue) {
+    if (newTotalPaid >= totalAmt) {
       newStatus = "paid";
-    } else if (newTotalPaid > 0 && newTotalPaid < totalDue) {
+    } else if (newTotalPaid > 0 && newTotalPaid < totalAmt) {
       newStatus = "partial";
     } else {
       newStatus = "unpaid";
@@ -590,7 +585,7 @@ export const sendOTP = async (req, res) => {
   generatedOTP = Math.floor(Math.random() * 100) + 1;
 
   //email of the person - to be changed
-  const emailToSend = "xekoj49255@feralrex.com";
+  const emailToSend = "yixop48781@discounp.com";
 
   try {
     await transporter.sendMail({
