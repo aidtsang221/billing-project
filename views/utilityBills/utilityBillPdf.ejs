@@ -149,18 +149,18 @@
                 <% if(utilities.category == 'water' || utilities.category ==
                 'electricity') { %>
                 <tr>
-                  <td>Previous Reading</td>
-                  <td>
-                    <%=
-                    parseFloat(utilities.prev_reading).toLocaleString('en-US', {
-                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                  </td>
-                </tr>
-                <tr>
                   <td>Current Reading</td>
                   <td>
                     <%=
                     parseFloat(utilities.curr_reading).toLocaleString('en-US', {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Previous Reading</td>
+                  <td>
+                    <%=
+                    parseFloat(utilities.prev_reading).toLocaleString('en-US', {
                     minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
                   </td>
                 </tr>
@@ -170,6 +170,13 @@
                     <%= parseFloat(utilities.curr_reading -
                     utilities.prev_reading).toLocaleString('en-US', {
                     minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Adjustment Fee</td>
+                  <td>
+                    <%= parseFloat(utilities.adjustment).toLocaleString('en-US',
+                    { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
                   </td>
                 </tr>
                 <% } else { %>

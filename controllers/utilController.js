@@ -509,7 +509,7 @@ export const generateWaterElectricExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Water and Electricity Report");
 
-    const buildingName = rows.length > 0 ? rows[0].bldg_name : "Building Name";
+    const buildingName = "Royal Peak";
 
     worksheet.mergeCells("A1:N1");
     const headerRow = worksheet.getCell("A1");
@@ -519,12 +519,14 @@ export const generateWaterElectricExcel = async (req, res) => {
 
     const columns = [
       { header: "Bill No.", key: "bill_no", width: 10 },
+      { header: "Bldg", key: "bldg_name", width: 20 },
       { header: "Owner", key: "owner_name", width: 20 },
       { header: "Unit No.", key: "unit_no", width: 10 },
       { header: "AR No.", key: "ack_no", width: 15 },
-      { header: "Rate", key: "rate", width: 15 },
       { header: "Previous Reading", key: "prev_reading", width: 15 },
       { header: "Current Reading", key: "curr_reading", width: 15 },
+      { header: "Rate", key: "rate", width: 15 },
+      { header: "Adjustment", key: "adjustment", width: 15 },
       { header: "Total Amount", key: "total_amt", width: 15 },
       { header: "Amount Paid", key: "amt_paid", width: 15 },
       { header: "Period Start", key: "start_date", width: 15 },
@@ -538,6 +540,13 @@ export const generateWaterElectricExcel = async (req, res) => {
       key: col.key,
       width: col.width,
     }));
+
+    worksheet.getColumn("prev_reading").numFmt = "0.00";
+    worksheet.getColumn("curr_reading").numFmt = "0.00";
+    worksheet.getColumn("adjustment").numFmt = "0.00";
+    worksheet.getColumn("rate").numFmt = "0.00";
+    worksheet.getColumn("total_amt").numFmt = "0.00";
+    worksheet.getColumn("amt_paid").numFmt = "0.00";
 
     worksheet.addRow(columns.map((col) => col.header));
 
@@ -553,6 +562,7 @@ export const generateWaterElectricExcel = async (req, res) => {
         rate: row.rate ? Number(row.rate) : 0,
         amt_paid: row.amt_paid ? Number(row.amt_paid) : 0,
         total_amt: row.total_amt ? Number(row.total_amt) : 0,
+        adjustment: row.adjustment ? Number(row.adjustment) : 0,
         start_date: row.start_date
           ? new Date(row.start_date).toLocaleDateString()
           : "",
@@ -605,7 +615,7 @@ export const generateInternetExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Internet Report");
 
-    const buildingName = rows.length > 0 ? rows[0].bldg_name : "Building Name";
+    const buildingName = "Royal Peak";
 
     worksheet.mergeCells("A1:K1");
     const headerRow = worksheet.getCell("A1");
@@ -616,6 +626,7 @@ export const generateInternetExcel = async (req, res) => {
     const columns = [
       { header: "Bill No.", key: "bill_no", width: 10 },
       { header: "Owner", key: "owner_name", width: 20 },
+      { header: "Bldg", key: "bldg_name", width: 20 },
       { header: "Unit No.", key: "unit_no", width: 10 },
       { header: "AR No.", key: "ack_no", width: 15 },
       { header: "Total Amount", key: "total_amt", width: 15 },
@@ -631,6 +642,9 @@ export const generateInternetExcel = async (req, res) => {
       key: col.key,
       width: col.width,
     }));
+
+    worksheet.getColumn("total_amt").numFmt = "0.00";
+    worksheet.getColumn("amt_paid").numFmt = "0.00";
 
     worksheet.addRow(columns.map((col) => col.header));
 

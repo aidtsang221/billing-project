@@ -229,7 +229,7 @@ export const generateAssocDuesExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Association Dues Report");
 
-    const buildingName = rows.length > 0 ? rows[0].bldg_name : "Building Name";
+    const buildingName = "Royal Peak";
 
     worksheet.mergeCells("A1:L1");
     const headerRow = worksheet.getCell("A1");
@@ -239,6 +239,7 @@ export const generateAssocDuesExcel = async (req, res) => {
 
     const columns = [
       { header: "Bill No.", key: "bill_no", width: 10 },
+      { header: "Bldg", key: "bldg_name", width: 20 },
       { header: "Owner", key: "owner_name", width: 20 },
       { header: "Unit No.", key: "unit_no", width: 10 },
       { header: "AR No.", key: "ack_no", width: 15 },
