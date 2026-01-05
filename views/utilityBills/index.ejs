@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Utility Bills</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="/vendor/datatables.net-dt/css/dataTables.dataTables.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/vendor/datatables.net-bs5/css/dataTables.bootstrap5.min.css"
+    />
     <style>
       .disabled-row {
         opacity: 0.6;
@@ -71,7 +79,7 @@
       <!-- Utility Bills Section -->
       <% if (hasUtilities) { %>
       <div class="table-responsive">
-        <table class="table table-striped table-hover">
+        <table id="utilTable" class="table table-striped table-hover">
           <thead class="table-light">
             <tr>
               <th>
@@ -179,7 +187,21 @@
       <% } %>
     </div>
 
+    <script src="/vendor/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/vendor/datatables.net/js/dataTables.min.js"></script>
+    <script src="/vendor/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Initialize DataTables
+        $("#utilTable").DataTable({
+          pageLength: 10,
+          searching: true,
+          ordering: true,
+        });
+      });
+    </script>
     <script>
       const selectAll = document.getElementById("selectAll");
       const checkboxes = document.querySelectorAll(".billCheckbox");

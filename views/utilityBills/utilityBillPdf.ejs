@@ -181,9 +181,9 @@
                 </tr>
                 <% } else { %>
                 <tr>
-                  <td colspan="2" class="text-center">
-                    <strong>Internet Rate:</strong> ₱<%=
-                    parseFloat(utilities.rate).toLocaleString('en-US', {
+                  <td><strong>Internet Rate:</strong></td>
+                  <td>
+                    ₱<%= parseFloat(utilities.rate).toLocaleString('en-US', {
                     minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
                   </td>
                 </tr>
