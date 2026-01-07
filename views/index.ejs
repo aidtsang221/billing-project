@@ -5,25 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Billing Project</title>
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <style>
-      body {
-        background-color: #f8f9fa;
-      }
-      .jumbotron {
-        background-color: #e9ecef;
-        padding: 4rem 2rem;
-        margin-bottom: 2rem;
-        border-radius: 0.3rem;
-        text-align: center;
-      }
-    </style>
   </head>
   <body>
     <%- include('partials/navbar') %>
 
     <div class="container mt-5">
-      <div class="jumbotron">
-        <h1 class="display-4">Dashboard</h1>
+      <div class="jumbotron mb-4">
+        <h1 class="text-left fw-bold">Dashboard</h1>
+      </div>
+
+      <!-- Association Dues Table -->
+      <div class="card mb-5">
+        <div class="card-header">
+          <h5>Recent 5 Association Dues</h5>
+        </div>
+
+        <div class="card-body p-0">
+          <table class="table table-striped table-bordered mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th>Unit No.</th>
+                <th>Owner</th>
+                <th>Total Paid</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% assocDashboard.forEach(assocDashboard => { %>
+              <tr>
+                <td><%= assocDashboard.unit_no %></td>
+                <td><%= assocDashboard.owner_name %></td>
+                <td>₱ <%= assocDashboard.total_paid %></td>
+                <td>₱ <%= assocDashboard.total_amt %></td>
+                <td>
+                  <span
+                    class="badge <%= assocDashboard.status === 'paid' ? 'bg-success' : assocDashboard.status === 'partial' ? 'bg-warning' : 'bg-danger' %>"
+                  >
+                    <%= assocDashboard.status %>
+                  </span>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Utilities Table -->
+      <div class="card">
+        <div class="card-header">
+          <h5>Recent 5 Utilities</h5>
+        </div>
+
+        <div class="card-body p-0">
+          <table class="table table-striped table-bordered mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th>Unit No.</th>
+                <th>Owner</th>
+                <th>Total Paid</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% utilDashboard.forEach(utilDashboard => { %>
+              <tr>
+                <td><%= utilDashboard.unit_no %></td>
+                <td><%= utilDashboard.owner_name %></td>
+                <td>₱ <%= utilDashboard.total_paid %></td>
+                <td>₱ <%= utilDashboard.total_amt %></td>
+                <td>
+                  <span
+                    class="badge <%= utilDashboard.status === 'paid' ? 'bg-success' : utilDashboard.status === 'partial' ? 'bg-warning' : 'bg-danger' %>"
+                    ><%= utilDashboard.status %></span
+                  >
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 

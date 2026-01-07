@@ -8,6 +8,7 @@ import ownerRoutes from "./routes/ownerRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import utilRoutes from "./routes/utilRoutes.js";
 import assocRoutes from "./routes/assocRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 dotenv.config();
 
@@ -29,10 +30,6 @@ app.use(
   express.static(path.join(__dirname, "node_modules/bootstrap/dist"))
 );
 
-app.get("/", (req, res) => {
-  res.render("index");
-});
-
 function formatDateForInput(date) {
   const d = new Date(date);
   const year = d.getFullYear();
@@ -44,6 +41,7 @@ function formatDateForInput(date) {
 // Available to EJS
 app.locals.formatDateForInput = formatDateForInput;
 
+app.use("/", dashboardRoutes);
 app.use("/bldgs", bldgRoutes);
 app.use("/units", unitRoutes);
 app.use("/settings", settingRoutes);
