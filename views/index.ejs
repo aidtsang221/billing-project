@@ -36,8 +36,16 @@
               <tr>
                 <td><%= assocDashboard.unit_no %></td>
                 <td><%= assocDashboard.owner_name %></td>
-                <td>₱ <%= assocDashboard.total_paid %></td>
-                <td>₱ <%= assocDashboard.total_amt %></td>
+                <td>
+                  ₱ <%=
+                  parseFloat(assocDashboard.total_paid).toLocaleString('en-US',
+                  { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                </td>
+                <td>
+                  ₱ <%=
+                  parseFloat(assocDashboard.total_amt).toLocaleString('en-US',
+                  {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                </td>
                 <td>
                   <span
                     class="badge <%= assocDashboard.status === 'paid' ? 'bg-success' : assocDashboard.status === 'partial' ? 'bg-warning' : 'bg-danger' %>"
@@ -74,8 +82,16 @@
               <tr>
                 <td><%= utilDashboard.unit_no %></td>
                 <td><%= utilDashboard.owner_name %></td>
-                <td>₱ <%= utilDashboard.total_paid %></td>
-                <td>₱ <%= utilDashboard.total_amt %></td>
+                <td>
+                  ₱ <%=
+                  parseFloat(utilDashboard.total_paid).toLocaleString('en-US',
+                  {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                </td>
+                <td>
+                  ₱ <%=
+                  parseFloat(utilDashboard.total_amt).toLocaleString('en-US',
+                  {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                </td>
                 <td>
                   <span
                     class="badge <%= utilDashboard.status === 'paid' ? 'bg-success' : utilDashboard.status === 'partial' ? 'bg-warning' : 'bg-danger' %>"
