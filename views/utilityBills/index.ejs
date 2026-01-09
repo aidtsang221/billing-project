@@ -35,30 +35,32 @@
       </div>
 
       <!-- Filters -->
-        <div class="col-12 col-md-3 mb-2 mb-md-0">
-          <form method="get" action="">
-            <select class="form-select" name="category" onchange="this.form.submit()">
-              <option value="">All Categories</option>
-              <option value="water" <%= (req.query.category === 'water') ? 'selected' : '' %>>Water</option>
-              <option value="electricity" <%= (req.query.category === 'electricity') ? 'selected' : '' %>>Electricity</option>
-              <option value="internet" <%= (req.query.category === 'internet') ? 'selected' : '' %>>Internet</option>
-              <option value="we" <%= (req.query.category === 'we') ? 'selected' : '' %>>Water + Electricity</option>
-            </select>
-          </form>
-        </div>
+       <% if (hasUtilities) { %>
+          <div class="col-12 col-md-3 mb-2 mb-md-0">
+            <form method="get" action="">
+              <select class="form-select" name="category" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                <option value="water" <%= (req.query.category === 'water') ? 'selected' : '' %>>Water</option>
+                <option value="electricity" <%= (req.query.category === 'electricity') ? 'selected' : '' %>>Electricity</option>
+                <option value="internet" <%= (req.query.category === 'internet') ? 'selected' : '' %>>Internet</option>
+                <option value="we" <%= (req.query.category === 'we') ? 'selected' : '' %>>Water + Electricity</option>
+              </select>
+            </form>
+          </div>
+        <% } %>
       
       <div class="col-12 col-md-6">
-        <div class="d-flex flex-wrap justify-content-md-end">
+        <div class="d-flex flex-column align-items-md-end">
           <a href="/utilityBills/add/<%= unitInfo.unit_id %>" class="btn btn-primary mb-2 me-2">
             Create Utility Bill
           </a>
 
           <% if (hasUtilities) { %>
             <a href="/utilityBills/exportWE" class="btn btn-success mb-2 me-2">
-              Download W+E
+              Download Water + Electricity (All Units)
             </a>
             <a href="/utilityBills/exportI" class="btn btn-success mb-2">
-              Download Net
+              Download Internet (All Units)
             </a>
           <% } %>
         </div>

@@ -210,19 +210,15 @@ export const generateAssocDuesPdf = async (req, res) => {
 //Generate Association Dues Report As Excel
 export const generateAssocDuesExcel = async (req, res) => {
   try {
-    const bldgId = req.params.bldgId;
-
     const [rows] = await pool.query(
       `
-      SELECT a.*, ap.*, CONCAT('M', '', a.assoc_id) AS bill_no, (a.total_amt + a.adjustment) as final_amount, CONCAT(o.first_name, ' ', o.last_name) AS owner_name, b.bldg_name, u.unit_no
+      SELECT CONCAT('M', '', a.assoc_id) AS bill_no, a.total_amt, a.start_date, a.end_date, a.due_date, ap.ack_no, ap.amt_paid, ap.date_paid, CONCAT(o.first_name, ' ', o.last_name) AS owner_name, b.bldg_name, u.unit_no, a.status
         FROM association_dues a
         JOIN unit u ON a.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
         JOIN bldg b ON b.bldg_id = u.bldg_id
         LEFT JOIN assoc_payments ap ON ap.assoc_id = a.assoc_id
-        WHERE b.bldg_id = ?
-    `,
-      [bldgId]
+    `
     );
 
     // Create a new Excel workbook and worksheet
@@ -243,7 +239,7 @@ export const generateAssocDuesExcel = async (req, res) => {
       { header: "Owner", key: "owner_name", width: 20 },
       { header: "Unit No.", key: "unit_no", width: 10 },
       { header: "AR No.", key: "ack_no", width: 15 },
-      { header: "Total Amt", key: "final_amount", width: 15 },
+      { header: "Total Amt", key: "total_amt", width: 15 },
       { header: "Adjustment Fee", key: "adjustment", width: 15 },
       { header: "Amount Paid", key: "amt_paid", width: 15 },
       { header: "Period Start", key: "start_date", width: 15 },
@@ -269,21 +265,22 @@ export const generateAssocDuesExcel = async (req, res) => {
     rows.forEach((row) => {
       worksheet.addRow({
         ...row,
-        final_amount: row.final_amount ? Number(row.final_amount) : 0,
+        total_amt: row.total_amt ? Number(row.total_amt) : 0,
         adjustment: row.adjustment ? Number(row.adjustment) : 0,
         amt_paid: row.amt_paid ? Number(row.amt_paid) : 0,
+        ack_no: row.ack_no ? Number(row.ack_no) : "-",
         start_date: row.start_date
           ? new Date(row.start_date).toLocaleDateString()
-          : "",
+          : "-",
         end_date: row.end_date
           ? new Date(row.end_date).toLocaleDateString()
-          : "",
+          : "-",
         due_date: row.due_date
           ? new Date(row.due_date).toLocaleDateString()
-          : "",
+          : "-",
         date_paid: row.date_paid
           ? new Date(row.date_paid).toLocaleDateString()
-          : "",
+          : "-",
       });
     });
 

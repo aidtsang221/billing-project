@@ -3,7 +3,7 @@ import * as assocController from "../controllers/assocController.js";
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/export/:bldgId", assocController.generateAssocDuesExcel);
+router.get("/export", assocController.generateAssocDuesExcel);
 
 router.get("/:unitId", assocController.getAllAssocDues);
 

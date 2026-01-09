@@ -493,7 +493,7 @@ export const insertPayment = async (req, res) => {
 export const generateWaterElectricExcel = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT ut.*, up.*, CONCAT('RC', '', ut.util_id) AS bill_no, uts.rate, uts.start_date, uts.end_date, uts.due_date, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, s.category
+      SELECT CONCAT('RC', '', ut.util_id) AS bill_no, ut.rate, ut.adjustment, ut.prev_reading, ut.curr_reading, ut.total_amt, ut.start_date, ut.end_date, ut.due_date, ut.status, up.ack_no, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, up.date_paid, up.amt_paid, s.category
         FROM utility ut 
         JOIN unit u ON ut.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
@@ -523,6 +523,7 @@ export const generateWaterElectricExcel = async (req, res) => {
       { header: "Owner", key: "owner_name", width: 20 },
       { header: "Unit No.", key: "unit_no", width: 10 },
       { header: "AR No.", key: "ack_no", width: 15 },
+      { header: "Category", key: "category", width: 15 },
       { header: "Previous Reading", key: "prev_reading", width: 15 },
       { header: "Current Reading", key: "curr_reading", width: 15 },
       { header: "Rate", key: "rate", width: 15 },
@@ -563,18 +564,19 @@ export const generateWaterElectricExcel = async (req, res) => {
         amt_paid: row.amt_paid ? Number(row.amt_paid) : 0,
         total_amt: row.total_amt ? Number(row.total_amt) : 0,
         adjustment: row.adjustment ? Number(row.adjustment) : 0,
+        ack_no: row.ack_no ? Number(row.ack_no) : "-",
         start_date: row.start_date
           ? new Date(row.start_date).toLocaleDateString()
-          : "",
+          : "-",
         end_date: row.end_date
           ? new Date(row.end_date).toLocaleDateString()
-          : "",
+          : "-",
         due_date: row.due_date
           ? new Date(row.due_date).toLocaleDateString()
-          : "",
+          : "-",
         date_paid: row.date_paid
           ? new Date(row.date_paid).toLocaleDateString()
-          : "",
+          : "-",
       });
     });
 
@@ -599,7 +601,7 @@ export const generateWaterElectricExcel = async (req, res) => {
 export const generateInternetExcel = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT ut.*, up.*, CONCAT('RC', '', ut.util_id) AS bill_no, uts.rate, uts.start_date, uts.end_date, uts.due_date, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, s.category
+      SELECT CONCAT('RC', '', ut.util_id) AS bill_no, ut.rate, ut.adjustment, ut.prev_reading, ut.curr_reading, ut.total_amt, ut.start_date, ut.end_date, ut.due_date, ut.status, up.ack_no, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, up.date_paid, up.amt_paid, s.category
         FROM utility ut 
         JOIN unit u ON ut.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
@@ -660,6 +662,7 @@ export const generateInternetExcel = async (req, res) => {
         rate: row.rate ? Number(row.rate) : 0,
         amt_paid: row.amt_paid ? Number(row.amt_paid) : 0,
         total_amt: row.total_amt ? Number(row.total_amt) : 0,
+        ack_no: row.ack_no ? Number(row.ack_no) : "-",
         start_date: row.start_date
           ? new Date(row.start_date).toLocaleDateString()
           : "",
@@ -671,7 +674,7 @@ export const generateInternetExcel = async (req, res) => {
           : "",
         date_paid: row.date_paid
           ? new Date(row.date_paid).toLocaleDateString()
-          : "",
+          : "-",
       });
     });
 
