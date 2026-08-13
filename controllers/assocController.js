@@ -37,12 +37,12 @@ export const getAllAssocDues = async (req, res) => {
       JOIN bldg b ON b.bldg_id = u.bldg_id
       WHERE u.unit_id = ?
       `,
-      [unitId]
+      [unitId],
     );
 
     const [unitInfoRows] = await pool.query(
       `SELECT unit_id FROM unit WHERE unit_id = ?`,
-      [unitId]
+      [unitId],
     );
 
     const unitInfo = unitInfoRows[0];
@@ -68,7 +68,7 @@ export const showAddForm = async (req, res) => {
         JOIN settings s ON s.bldg_id = b.bldg_id AND s.category = "association_dues"
         JOIN assocdues_settings ads ON ads.setting_id = s.setting_id
         WHERE u.unit_id = ?`,
-      [unitId]
+      [unitId],
     );
 
     const unit = units[0];
@@ -85,7 +85,7 @@ export const showAddForm = async (req, res) => {
 // Create New Association Dues by unit id
 export const addAssocDues = async (req, res) => {
   const unitId = req.params.unitId;
-  const { assocSettingId, adjustment, total_amt } = req.body;
+  const { assocSettingId, adjustment, total_amt, remarks } = req.body;
 
   // Basic validation
   if (!unitId || !total_amt) {
@@ -100,7 +100,7 @@ export const addAssocDues = async (req, res) => {
       `SELECT amount, start_date, end_date, due_date
          FROM assocdues_settings
         WHERE id = ?`,
-      [assocSettingId]
+      [assocSettingId],
     );
 
     if (settings.length === 0) {
@@ -110,7 +110,7 @@ export const addAssocDues = async (req, res) => {
     const { amount, start_date, end_date, due_date } = settings[0];
 
     await pool.query(
-      "INSERT INTO association_dues (unit_id, assocsetting_id, total_amt, adjustment, amount, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+      "INSERT INTO association_dues (unit_id, assocsetting_id, total_amt, adjustment, amount, start_date, end_date, due_date, remarks, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
       [
         unitId,
         assocSettingId,
@@ -120,7 +120,8 @@ export const addAssocDues = async (req, res) => {
         start_date,
         end_date,
         due_date,
-      ]
+        remarks,
+      ],
     );
     res.redirect(`/assocBills/${unitId}`);
   } catch (error) {
@@ -141,7 +142,7 @@ export const generateAssocDuesPdf = async (req, res) => {
         JOIN owner o ON o.unit_id = u.unit_id
         JOIN bldg b ON b.bldg_id = u.bldg_id
         WHERE a.assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
     if (assocRows.length === 0) {
       return res
@@ -162,7 +163,7 @@ export const generateAssocDuesPdf = async (req, res) => {
             return reject(err);
           }
           resolve(html);
-        }
+        },
       );
     });
 
@@ -194,7 +195,7 @@ export const generateAssocDuesPdf = async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename=Assoc_Bill_Unit_${assocBill.unit_no}_${assocBill.last_name}_${assocId}.pdf`
+      `inline; filename=Assoc_Bill_Unit_${assocBill.unit_no}_${assocBill.last_name}_${assocId}.pdf`,
     );
     res.send(pdfBuffer);
   } catch (error) {
@@ -212,13 +213,13 @@ export const generateAssocDuesExcel = async (req, res) => {
   try {
     const [rows] = await pool.query(
       `
-      SELECT CONCAT('M', '', a.assoc_id) AS bill_no, a.total_amt, a.start_date, a.end_date, a.due_date, ap.ack_no, ap.amt_paid, ap.date_paid, CONCAT(o.first_name, ' ', o.last_name) AS owner_name, b.bldg_name, u.unit_no, a.status
+      SELECT CONCAT('M', '', a.assoc_id) AS bill_no, a.total_amt, a.start_date, a.end_date, a.due_date, ap.ack_no, ap.amt_paid, ap.date_paid, CONCAT(o.first_name, ' ', o.last_name) AS owner_name, b.bldg_name, u.unit_no, a.status, a.remarks
         FROM association_dues a
         JOIN unit u ON a.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
         JOIN bldg b ON b.bldg_id = u.bldg_id
         LEFT JOIN assoc_payments ap ON ap.assoc_id = a.assoc_id
-    `
+    `,
     );
 
     // Create a new Excel workbook and worksheet
@@ -247,6 +248,7 @@ export const generateAssocDuesExcel = async (req, res) => {
       { header: "Due Date", key: "due_date", width: 15 },
       { header: "Date Paid", key: "date_paid", width: 15 },
       { header: "Status", key: "status", width: 10 },
+      { header: "Remarks", key: "remarks", width: 20 },
     ];
 
     worksheet.columns = columns.map((col) => ({
@@ -286,11 +288,11 @@ export const generateAssocDuesExcel = async (req, res) => {
 
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=assoc_dues_report.xlsx"
+      "attachment; filename=assoc_dues_report.xlsx",
     );
 
     await workbook.xlsx.write(res);
@@ -318,7 +320,8 @@ export const showEditAssocForm = async (req, res) => {
         DATE_FORMAT(ad.start_date, '%Y-%m-%d') AS start_date,
         DATE_FORMAT(ad.end_date, '%Y-%m-%d') AS end_date,
         DATE_FORMAT(ad.due_date, '%Y-%m-%d') AS due_date,
-        ad.amount
+        ad.amount,
+        ad.remarks
       FROM
         association_dues ad
         JOIN unit u ON ad.unit_id = u.unit_id
@@ -327,7 +330,7 @@ export const showEditAssocForm = async (req, res) => {
         AND s.category = "association_dues"
       WHERE
         ad.assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
 
     const assocDues = assocDuesRows[0];
@@ -344,12 +347,12 @@ export const showEditAssocForm = async (req, res) => {
 //Edit Association Dues
 export const updateAssocDues = async (req, res) => {
   const assocId = req.params.id;
-  const { unit_id, adjustment } = req.body;
+  const { unit_id, adjustment, remarks } = req.body;
 
   try {
     const [result] = await pool.query(
-      "UPDATE association_dues SET adjustment = ? WHERE assoc_id = ?",
-      [adjustment || 0, assocId]
+      "UPDATE association_dues SET adjustment = ?, remarks = ? WHERE assoc_id = ?",
+      [adjustment || 0, remarks, assocId],
     );
     if (result.affectedRows === 0) {
       return res
@@ -379,7 +382,7 @@ export const showPaymentList = async (req, res) => {
       WHERE
         ad.assoc_id = ?
       `,
-      [assocId]
+      [assocId],
     );
 
     const [assocDues] = await pool.query(
@@ -397,7 +400,7 @@ export const showPaymentList = async (req, res) => {
         JOIN unit u ON u.unit_id = ad.unit_id
       WHERE
         ap.assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
 
     res.render("assocBills/paymentList", { assocDues, unit });
@@ -406,7 +409,7 @@ export const showPaymentList = async (req, res) => {
     res
       .status(500)
       .send(
-        "Error showing association dues payment list. Please check server logs."
+        "Error showing association dues payment list. Please check server logs.",
       );
   }
 };
@@ -434,14 +437,14 @@ export const showCreatePayment = async (req, res) => {
         JOIN bldg b ON b.bldg_id = u.bldg_id
       WHERE
         ad.assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
 
     const [assocPayRows] = await pool.query(
       `
       SELECT SUM(amt_paid) as total_paid FROM assoc_payments WHERE assoc_id = ?
       `,
-      [assocId]
+      [assocId],
     );
 
     const totalAmt = parseFloat(assocDuesRows[0].total_amt) || 0;
@@ -465,7 +468,7 @@ export const showCreatePayment = async (req, res) => {
     res
       .status(500)
       .send(
-        "Error showing association dues payment. Please check server logs."
+        "Error showing association dues payment. Please check server logs.",
       );
   }
 };
@@ -487,7 +490,7 @@ export const insertPayment = async (req, res) => {
   try {
     const [[assocDues]] = await pool.query(
       `SELECT total_amt, unit_id, status FROM association_dues WHERE assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
 
     if (!assocDues) {
@@ -499,7 +502,7 @@ export const insertPayment = async (req, res) => {
     // Sum up existing payments
     const [[{ totalPaid }]] = await pool.query(
       `SELECT SUM(amt_paid) as totalPaid FROM assoc_payments WHERE assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
 
     const newTotalPaid = (
@@ -513,13 +516,13 @@ export const insertPayment = async (req, res) => {
         .send(
           `Payment exceeds total amount due. You still owe ${
             totalAmt - totalPaid
-          }`
+          }`,
         );
     }
 
     const [payment] = await pool.query(
       `INSERT INTO assoc_payments (assoc_id, ack_no, amt_paid, date_paid) VALUES (?, ?, ?, ?)`,
-      [assocId, ack_no, payment_amount, date_paid]
+      [assocId, ack_no, payment_amount, date_paid],
     );
 
     // Determine new status
@@ -537,7 +540,7 @@ export const insertPayment = async (req, res) => {
       `UPDATE association_dues 
        SET status = ?, updated_at = NOW() 
        WHERE assoc_id = ?`,
-      [newStatus, assocId]
+      [newStatus, assocId],
     );
 
     if (result.affectedRows === 0) {
@@ -558,7 +561,7 @@ export const cancelAssocDues = async (req, res) => {
   try {
     const [[assocDues]] = await pool.query(
       `SELECT unit_id FROM association_dues WHERE assoc_id = ?`,
-      [assocId]
+      [assocId],
     );
 
     const [result] = await pool.query(
@@ -566,7 +569,7 @@ export const cancelAssocDues = async (req, res) => {
        SET status = 'cancelled', updated_at = NOW()
        WHERE assoc_id = ?
        `,
-      [assocId]
+      [assocId],
     );
 
     res.redirect(`/assocBills/${assocDues.unit_id}`);
