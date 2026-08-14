@@ -49,7 +49,7 @@ export const getAllUtils = async (req, res) => {
 
     const [unitInfoRows] = await pool.query(
       `SELECT unit_id FROM unit WHERE unit_id = ?`,
-      [unitId]
+      [unitId],
     );
 
     const unitInfo = unitInfoRows[0];
@@ -73,7 +73,7 @@ export const showAddForm = async (req, res) => {
       FROM unit u
       JOIN bldg b ON u.bldg_id = b.bldg_id
       WHERE u.unit_id = ?`,
-      [unitId]
+      [unitId],
     );
 
     const unitInfo = unit[0];
@@ -85,7 +85,7 @@ export const showAddForm = async (req, res) => {
       JOIN utility_settings uts ON uts.setting_id = s.setting_id
       WHERE s.bldg_id = ? AND s.category IN ('water', 'electricity', 'internet')
     `,
-      [unitInfo.bldg_id]
+      [unitInfo.bldg_id],
     );
 
     const rates = {
@@ -106,8 +106,14 @@ export const showAddForm = async (req, res) => {
 // Create New Utility Bill of unit id
 export const addUtilityBill = async (req, res) => {
   const unitId = req.params.unitId;
-  const { adjustment, utilSettingId, prev_reading, curr_reading, total_amt } =
-    req.body;
+  const {
+    adjustment,
+    utilSettingId,
+    prev_reading,
+    curr_reading,
+    total_amt,
+    remarks,
+  } = req.body;
 
   // Basic validation
   if (!utilSettingId || !total_amt) {
@@ -119,7 +125,7 @@ export const addUtilityBill = async (req, res) => {
       `SELECT rate, start_date, end_date, due_date
          FROM utility_settings
         WHERE id = ?`,
-      [utilSettingId]
+      [utilSettingId],
     );
 
     if (settings.length === 0) {
@@ -129,7 +135,7 @@ export const addUtilityBill = async (req, res) => {
     const { rate, start_date, end_date, due_date } = settings[0];
 
     await pool.query(
-      "INSERT INTO utility (unit_id, utilsetting_id, prev_reading, curr_reading, adjustment, total_amt, rate, start_date, end_date, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+      "INSERT INTO utility (unit_id, utilsetting_id, prev_reading, curr_reading, adjustment, total_amt, rate, start_date, end_date, due_date, remarks, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
       [
         unitId,
         utilSettingId,
@@ -141,7 +147,8 @@ export const addUtilityBill = async (req, res) => {
         start_date,
         end_date,
         due_date,
-      ]
+        remarks,
+      ],
     );
     res.redirect(`/utilityBills/${unitId}`);
   } catch (error) {
@@ -169,7 +176,7 @@ export const generateUtilityPdf = async (req, res) => {
        JOIN utility_settings uts ON ut.utilsetting_id = uts.id
        JOIN settings s ON uts.setting_id = s.setting_id
        WHERE ut.util_id IN (?)`,
-      [billIds]
+      [billIds],
     );
 
     const htmlContent = await new Promise((resolve, reject) => {
@@ -183,7 +190,7 @@ export const generateUtilityPdf = async (req, res) => {
             return reject(err);
           }
           resolve(html);
-        }
+        },
       );
     });
 
@@ -209,7 +216,7 @@ export const generateUtilityPdf = async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename=Utility_Bill_Selected.pdf`
+      `inline; filename=Utility_Bill_Selected.pdf`,
     );
     res.send(pdfBuffer);
   } catch (error) {
@@ -237,6 +244,7 @@ export const showEditUtilityForm = async (req, res) => {
         ut.utilsetting_id,
         ut.total_amt,
         ut.adjustment,
+        ut.remarks,
         DATE_FORMAT(ut.start_date, '%Y-%m-%d') AS start_date,
         DATE_FORMAT(ut.end_date, '%Y-%m-%d') AS end_date,
         DATE_FORMAT(ut.due_date, '%Y-%m-%d') AS due_date,
@@ -251,7 +259,7 @@ export const showEditUtilityForm = async (req, res) => {
       JOIN utility_settings uts ON ut.utilsetting_id = uts.id
       JOIN settings s ON uts.setting_id = s.setting_id
       WHERE ut.util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     const utilityBill = util[0];
@@ -263,7 +271,7 @@ export const showEditUtilityForm = async (req, res) => {
       JOIN utility_settings uts ON uts.setting_id = s.setting_id
       WHERE s.bldg_id = ? AND s.category IN ('water', 'electricity', 'internet')
       `,
-      [utilityBill.bldg_id]
+      [utilityBill.bldg_id],
     );
 
     const rates = {
@@ -291,19 +299,21 @@ export const updateUtilityBill = async (req, res) => {
     total_amt,
     unit_id,
     adjustment,
+    remarks,
   } = req.body;
 
   try {
     const [result] = await pool.query(
-      "UPDATE utility SET utilsetting_id = ?, prev_reading = ?, curr_reading = ?, total_amt = ?, adjustment = ? WHERE util_id = ?",
+      "UPDATE utility SET utilsetting_id = ?, prev_reading = ?, curr_reading = ?, total_amt = ?, adjustment = ?, remarks = ? WHERE util_id = ?",
       [
         utilSettingId,
         prev_reading || 0,
         curr_reading || 0,
         total_amt,
         adjustment || 0,
+        remarks,
         utilId,
-      ]
+      ],
     );
 
     res.redirect(`/utilityBills/${unit_id}`);
@@ -328,7 +338,7 @@ export const showPaymentList = async (req, res) => {
         JOIN unit u ON u.unit_id = ut.unit_id
       WHERE
         ut.util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     const [util] = await pool.query(
@@ -346,7 +356,7 @@ export const showPaymentList = async (req, res) => {
         JOIN unit u ON ut.unit_id = u.unit_id
       WHERE
         up.util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     res.render("utilityBills/paymentList", { util, unit });
@@ -378,14 +388,14 @@ export const showCreatePayment = async (req, res) => {
         JOIN bldg b ON b.bldg_id = u.bldg_id
       WHERE
         ut.util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     const [utilPayRows] = await pool.query(
       `
       SELECT SUM(amt_paid) as total_paid FROM util_payments WHERE util_id = ?
       `,
-      [utilId]
+      [utilId],
     );
 
     const totalPaid = utilPayRows[0].total_paid || 0;
@@ -427,7 +437,7 @@ export const insertPayment = async (req, res) => {
   try {
     const [[util]] = await pool.query(
       `SELECT total_amt, unit_id, status FROM utility WHERE util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     if (!util) {
@@ -439,7 +449,7 @@ export const insertPayment = async (req, res) => {
     // Sum up existing payments
     const [[{ totalPaid }]] = await pool.query(
       `SELECT SUM(amt_paid) as totalPaid FROM util_payments WHERE util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     const newTotalPaid = (
@@ -453,13 +463,13 @@ export const insertPayment = async (req, res) => {
         .send(
           `Payment exceeds total amount due. You still owe ${
             totalDue - totalPaid
-          }`
+          }`,
         );
     }
 
     const [payment] = await pool.query(
       `INSERT INTO util_payments (util_id, ack_no, amt_paid, date_paid) VALUES (?, ?, ?, ?)`,
-      [utilId, ack_no, payment_amount, date_paid]
+      [utilId, ack_no, payment_amount, date_paid],
     );
 
     // Determine new status
@@ -475,7 +485,7 @@ export const insertPayment = async (req, res) => {
       `UPDATE utility 
        SET status = ?, updated_at = NOW() 
        WHERE util_id = ?`,
-      [newStatus, utilId]
+      [newStatus, utilId],
     );
 
     if (result.affectedRows === 0) {
@@ -493,7 +503,7 @@ export const insertPayment = async (req, res) => {
 export const generateWaterElectricExcel = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT CONCAT('RC', '', ut.util_id) AS bill_no, ut.rate, ut.adjustment, ut.prev_reading, ut.curr_reading, ut.total_amt, ut.start_date, ut.end_date, ut.due_date, ut.status, up.ack_no, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, up.date_paid, up.amt_paid, s.category
+      SELECT CONCAT('RC', '', ut.util_id) AS bill_no, ut.rate, ut.adjustment, ut.prev_reading, ut.curr_reading, ut.total_amt, ut.start_date, ut.end_date, ut.due_date, ut.status, ut.remarks, up.ack_no, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, up.date_paid, up.amt_paid, s.category
         FROM utility ut 
         JOIN unit u ON ut.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
@@ -535,6 +545,7 @@ export const generateWaterElectricExcel = async (req, res) => {
       { header: "Due Date", key: "due_date", width: 15 },
       { header: "Date Paid", key: "date_paid", width: 15 },
       { header: "Status", key: "status", width: 10 },
+      { header: "Remarks", key: "remarks", width: 20 },
     ];
 
     worksheet.columns = columns.map((col) => ({
@@ -582,11 +593,11 @@ export const generateWaterElectricExcel = async (req, res) => {
 
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=water_electric_report.xlsx"
+      "attachment; filename=water_electric_report.xlsx",
     );
 
     await workbook.xlsx.write(res);
@@ -601,7 +612,7 @@ export const generateWaterElectricExcel = async (req, res) => {
 export const generateInternetExcel = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT CONCAT('RC', '', ut.util_id) AS bill_no, ut.rate, ut.adjustment, ut.prev_reading, ut.curr_reading, ut.total_amt, ut.start_date, ut.end_date, ut.due_date, ut.status, up.ack_no, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, up.date_paid, up.amt_paid, s.category
+      SELECT CONCAT('RC', '', ut.util_id) AS bill_no, ut.rate, ut.adjustment, ut.prev_reading, ut.curr_reading, ut.total_amt, ut.start_date, ut.end_date, ut.due_date, ut.status, ut.remarks, up.ack_no, b.bldg_name, u.unit_no, CONCAT(o.first_name, " ", o.last_name) AS owner_name, up.date_paid, up.amt_paid, s.category
         FROM utility ut 
         JOIN unit u ON ut.unit_id = u.unit_id
         JOIN owner o ON o.unit_id = u.unit_id
@@ -638,6 +649,7 @@ export const generateInternetExcel = async (req, res) => {
       { header: "Due Date", key: "due_date", width: 15 },
       { header: "Date Paid", key: "date_paid", width: 15 },
       { header: "Status", key: "status", width: 10 },
+      { header: "Remarks", key: "remarks", width: 20 },
     ];
 
     worksheet.columns = columns.map((col) => ({
@@ -680,11 +692,11 @@ export const generateInternetExcel = async (req, res) => {
 
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=internet_report.xlsx"
+      "attachment; filename=internet_report.xlsx",
     );
 
     await workbook.xlsx.write(res);
@@ -702,7 +714,7 @@ export const cancelUtilities = async (req, res) => {
   try {
     const [[utils]] = await pool.query(
       `SELECT unit_id FROM utility WHERE util_id = ?`,
-      [utilId]
+      [utilId],
     );
 
     const [result] = await pool.query(
@@ -711,7 +723,7 @@ export const cancelUtilities = async (req, res) => {
       SET status = 'cancelled', updated_at = NOW()
       WHERE util_id = ?
       `,
-      [utilId]
+      [utilId],
     );
 
     res.redirect(`/utilityBills/${utils.unit_id}`);

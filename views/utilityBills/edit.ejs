@@ -81,36 +81,40 @@
             </p>
           </div>
 
-          <div class="row" id="readingFields">
-            <div class="col-md-6 mb-3">
-              <label for="prev_reading" class="form-label"
-                >Previous Reading:</label
-              >
-              <input
-                type="number"
-                class="form-control"
-                id="prev_reading"
-                name="prev_reading"
-                placeholder="e.g., 1500"
-                value="<%= utilityBill.prev_reading %>"
-                required
-              />
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="curr_reading" class="form-label"
-                >Current Reading:</label
-              >
-              <input
-                type="number"
-                class="form-control"
-                id="curr_reading"
-                name="curr_reading"
-                placeholder="e.g., 1650"
-                value="<%= utilityBill.curr_reading %>"
-                required
-              />
-              <div class="invalid-feedback">
-                Current reading cannot be less than previous reading.
+          <div class="row">
+
+            <div class="row" id="readingFields">
+
+              <div class="col-md-6 mb-3">
+                <label for="prev_reading" class="form-label"
+                  >Previous Reading:</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="prev_reading"
+                  name="prev_reading"
+                  placeholder="e.g., 1500"
+                  value="<%= utilityBill.prev_reading %>"
+                  required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="curr_reading" class="form-label"
+                  >Current Reading:</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="curr_reading"
+                  name="curr_reading"
+                  placeholder="e.g., 1650"
+                  value="<%= utilityBill.curr_reading %>"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Current reading cannot be less than previous reading.
+                </div>
               </div>
             </div>
 
@@ -196,6 +200,16 @@
                 disabled
               />
             </div>
+          </div>
+
+          <div class="form-group">
+            <label for="remarks" class="form-label">Remarks (Optional):</label>
+            <textarea
+              class="form-control"
+              id="remarks"
+              name="remarks"
+              rows="3"
+            ><%= utilityBill.remarks %></textarea>
           </div>
 
           <div class="d-flex justify-content-end mt-4">
@@ -318,7 +332,6 @@
             endDateInput.value = "";
             dueDateInput.value = "";
           }
-
           toggleReadingFields();
           calculateAndDisplayTotal();
         });
@@ -326,6 +339,9 @@
         prevReadingInput.addEventListener("input", calculateAndDisplayTotal);
         currReadingInput.addEventListener("input", calculateAndDisplayTotal);
         adjustmentInput.addEventListener("input", calculateAndDisplayTotal);
+
+        toggleReadingFields();
+        calculateAndDisplayTotal();
       });
 
       document.addEventListener("DOMContentLoaded", () => {
