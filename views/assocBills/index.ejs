@@ -13,12 +13,6 @@
       rel="stylesheet"
       href="/vendor/datatables.net-bs5/css/dataTables.bootstrap5.min.css"
     />
-    <style>
-      .disabled-row {
-        opacity: 0.6;
-        pointer-events: none;
-      }
-    </style>
   </head>
   <body>
     <%- include('../partials/navbar') %>
@@ -62,9 +56,7 @@
           </thead>
           <tbody>
             <% assocDues.forEach(bill => { %>
-            <tr
-              class="<%= bill.status === 'cancelled' ? 'disabled-row' : '' %>"
-            >
+            <tr>
               <td>M<%= bill.assoc_id %></td>
               <td><%= bill.owner_name %></td>
               <td><%= bill.unit_no %></td>
