@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
   "/bootstrap",
-  express.static(path.join(__dirname, "node_modules/bootstrap/dist"))
+  express.static(path.join(__dirname, "node_modules/bootstrap/dist")),
 );
 
 function formatDateForInput(date) {
@@ -52,6 +52,8 @@ app.use("/assocBills", assocRoutes);
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+export function startServer() {
+  return app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  });
+}

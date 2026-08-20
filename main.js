@@ -1,18 +1,9 @@
 import { app, BrowserWindow } from "electron";
-
-import { spawn } from "child_process";
-
 import http from "http";
 
+import { startServer } from "./app.js";
+
 let server;
-
-function startServer() {
-  server = spawn("node", ["app.js"], {
-    shell: true,
-
-    stdio: "inherit",
-  });
-}
 
 function waitForServer(url, callback) {
   const request = http.get(url, () => {
@@ -38,14 +29,21 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  startServer();
+  server = startServer();
 
   createWindow();
 });
 
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
   if (server) {
-    server.kill();
+    await new Promise((resolve) => {
+      server.close(() => {
+        console.log("Express server closed.");
+        resolve();
+      });
+    });
+
+    server = null;
   }
 
   app.quit();
